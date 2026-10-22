@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3f6b52">
+<meta name="description" content="大愛學漢醫島：十六座中醫主題園區，沿著症狀、醫師與年份散步找影片。">
+<title>大愛學漢醫島</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/build/three.module.min.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="stage" role="img" aria-label="十六座中醫主題園區組成的小島。完整文字清單請用清單按鈕。">
+    <div id="labels"></div>
+  </div>
+
+  <header id="top">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">島</span>
+      <div>
+        <h1>大愛學漢醫島</h1>
+        <p id="brand-sub">十六座主題園區</p>
+      </div>
+    </div>
+    <form id="search-form" role="search">
+      <input id="q" type="search" placeholder="搜尋症狀或關鍵字，例如失眠" aria-label="搜尋症狀或關鍵字" autocomplete="off" enterkeyhint="search">
+    </form>
+  </header>
+
+  <nav class="tools" aria-label="島上操作">
+    <button type="button" id="btn-home">全景</button>
+    <button type="button" id="btn-list" aria-pressed="false">☰ 清單</button>
+    <button type="button" id="btn-time" aria-pressed="false">◷ 時間</button>
+    <button type="button" id="btn-pause" aria-pressed="false">暫停</button>
+    <button type="button" id="btn-bird" aria-pressed="false">鳥瞰</button>
+    <button type="button" id="btn-help" aria-label="導覽">?</button>
+  </nav>
+
+  <aside id="list" hidden aria-label="主題清單">
+    <div class="list-head">
+      <div>
+        <p class="eyebrow">十六座園區</p>
+        <h2>用清單走一遍</h2>
+      </div>
+      <button type="button" id="list-close" aria-label="關閉清單">×</button>
+    </div>
+    <p class="list-note">點一座園區，鏡頭會飛過去，並打開影片。</p>
+    <div id="list-body"></div>
+  </aside>
+
+  <article id="panel" hidden aria-label="詳細資料">
+    <button type="button" class="sheet-handle" data-expand aria-label="展開或收合面板"><i></i></button>
+    <button type="button" class="panel-close" data-close aria-label="關閉">×</button>
+    <div id="panel-body"></div>
+  </article>
+
+  <section id="timebar" hidden aria-label="年份時間軸">
+    <div class="time-row">
+      <output id="year-out" for="year">2024</output>
+      <input id="year" type="range" min="2022" max="2026" value="2024" step="1" aria-label="影片年份，2022 到 2026">
+    </div>
+    <div class="ticks" aria-hidden="true"><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span></div>
+    <p id="year-note"></p>
+  </section>
+
+  <footer>
+    <a href="../">← 返回索引</a>
+    <span>影片來源 <a href="https://www.youtube.com/@HanE-canHelp" target="_blank" rel="noopener">YouTube @HanE-canHelp</a></span>
+    <span>粉絲整理・非官方・不能取代就醫</span>
+  </footer>
+
+  <div id="tour" hidden>
+    <div class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title">
+      <p class="eyebrow" id="tour-step">導覽 1 / 5</p>
+      <h2 id="tour-title"></h2>
+      <p id="tour-body"></p>
+      <div class="tour-actions">
+        <button type="button" id="tour-skip">略過</button>
+        <button type="button" id="tour-next">下一步</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="live" class="sr" aria-live="polite"></div>
+  <div id="loading" role="status">正在把園區種上小島…</div>
+</div>
+<script src="../data.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
