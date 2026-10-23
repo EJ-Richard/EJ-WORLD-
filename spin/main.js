@@ -165,6 +165,10 @@ function renderList() {
   list.scrollTop = prev;
 }
 
+function shortPart(name) {
+  return String(name).replaceAll("發射器", "").replaceAll("握把", "").trim() || name;
+}
+
 function choices(list, current) {
   if (list.some((item) => (item.id || item) === current)) return list;
   return [current, ...list];
@@ -178,7 +182,9 @@ function fillChips(container, items, key, current, labeler) {
     btn.type = "button";
     btn.dataset.k = key;
     btn.dataset.v = value;
-    btn.textContent = labeler(item);
+    const label = labeler(item);
+    btn.textContent = label;
+    btn.title = item.name_zh || item.name_jp || label;
     if (value === current) btn.classList.add("is-on");
     container.appendChild(btn);
   }
@@ -193,8 +199,8 @@ function renderParts() {
   const ratchets = choices(RATCHET_CHOICES, side.ratchet);
   fillChips($("part-ratchets"), ratchets, "ratchet", side.ratchet, (id) => id);
   fillChips($("part-bits"), bits, "bit", side.bit, (bit) => `${bit.id} ${bit.zh}`);
-  fillChips($("part-launchers"), LAUNCHERS, "launcherId", side.launcherId, (item) => item.name_zh || item.name_jp);
-  fillChips($("part-grips"), GRIPS, "gripId", side.gripId, (item) => item.name_zh || item.name_jp);
+  fillChips($("part-launchers"), LAUNCHERS, "launcherId", side.launcherId, (item) => shortPart(item.name_zh || item.name_jp));
+  fillChips($("part-grips"), GRIPS, "gripId", side.gripId, (item) => shortPart(item.name_zh || item.name_jp));
   $("combo-label").textContent = `${stats.label}　${stats.code}　${stats.combo}${stats.left ? "　左迴旋" : ""}${custom ? "　已改裝" : ""}`;
   const bars = [
     ["攻擊", stats.bars.atk, "atk"],
@@ -316,7 +322,8 @@ function drawMap() {
   const canvas = $("drop-map");
   const rect = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const size = Math.max(240, Math.floor(Math.min(rect.width || 320, rect.height || 320)));
+  const box = Math.min(rect.width || 0, rect.height || 0);
+  const size = box > 8 ? Math.floor(box) : 320;
   canvas.width = Math.floor(size * dpr);
   canvas.height = canvas.width;
   const g = canvas.getContext("2d");
@@ -436,6 +443,7 @@ function enterLaunch() {
   show("launch");
   requestAnimationFrame(() => {
     drawMap();
+    requestAnimationFrame(drawMap);
     updateLaunchReadout();
     cancelAnimationFrame(powerRaf);
     powerRaf = requestAnimationFrame(powerLoop);
