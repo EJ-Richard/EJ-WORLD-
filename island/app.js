@@ -1,10 +1,10 @@
-// taiwan-oldtown-20261023 — 十六座台灣古城拼成的大愛學漢醫島
+// taiwan-oldtown-20261023b — 十六座台灣古城拼成的大愛學漢醫島
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { buildIsland, TOWNS, LAND, pointInPoly } from "./layout.js";
 
-const ISLAND_REV = "taiwan-oldtown-20261023";
+const ISLAND_REV = "taiwan-oldtown-20261023b";
 void ISLAND_REV;
 
 const DATA = window.DATA;
@@ -210,6 +210,7 @@ function boot() {
       adaptCrowd(dt, warm, renderer);
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
+      declutterLabels(camera, controls);
       if (!started) {
         started = true;
         loadingEl.classList.add("hide");
@@ -236,17 +237,23 @@ function framedPose(camera, kind) {
   const b = layout.bbox;
   const cx = (b.minx + b.maxx) / 2;
   const cz = (b.miny + b.maxy) / 2;
-  const hw = (b.maxx - b.minx) / 2 + 1.6;
-  const hh = (b.maxy - b.miny) / 2 + 1.8;
+  const hw = (b.maxx - b.minx) / 2 + 2.4;
+  const hh = (b.maxy - b.miny) / 2 + 3.1;
   const vf = Math.tan((camera.fov * Math.PI) / 360);
   const hf = vf * Math.max(0.35, camera.aspect || 1);
-  const dist = Math.max(hh / vf, hw / hf);
+  const fit = Math.max(hh / vf, hw / hf);
+  // Aim a little north of center so the north tip sits below the toolbar.
+  const north = hh * 0.16;
   if (kind === "bird") {
-    return { p: new THREE.Vector3(cx, dist * 1.02, cz - Math.min(5.5, hh * 0.18)), t: new THREE.Vector3(cx, 0, cz) };
+    return {
+      p: new THREE.Vector3(cx, fit * 1.05, cz - hh * 0.08),
+      t: new THREE.Vector3(cx, 0, cz + north),
+    };
   }
+  const dist = fit * 1.02;
   return {
-    p: new THREE.Vector3(cx - hw * 0.06, dist * 0.74, cz - dist * 0.3),
-    t: new THREE.Vector3(cx - 0.35, 0.05, cz + 0.05),
+    p: new THREE.Vector3(cx, dist * 0.58, cz - dist * 0.46),
+    t: new THREE.Vector3(cx, 0.08, cz + north),
   };
 }
 function homePose(camera) { return framedPose(camera, "home"); }
@@ -283,19 +290,78 @@ function stepFlight(now, camera, controls) {
 function viewFor(id) {
   const d = districts.get(id);
   const portrait = window.innerWidth < 760;
-  const span = Math.sqrt(Math.max(0.4, d.area));
-  const dist = THREE.MathUtils.clamp(1.45 + span * 0.2, portrait ? 2.45 : 1.95, portrait ? 4.1 : 3.25);
-  const height = d.kind === "hill" ? dist * 0.48 : dist * (portrait ? 0.26 : 0.18);
+  const dist = portrait ? 5.1 : 4.15;
+  const height = d.kind === "hill" ? 2.5 : (portrait ? 2.15 : 1.72);
   const dir = d.street;
   const perp = [-dir[1], dir[0]];
-  const fx = perp[0] * 0.78 + dir[0] * 0.42;
-  const fz = perp[1] * 0.78 + dir[1] * 0.42;
+  const fx = dir[0] * 0.82 + perp[0] * 0.42;
+  const fz = dir[1] * 0.82 + perp[1] * 0.42;
   const fl = Math.hypot(fx, fz) || 1;
-  const y0 = d.kind === "hill" ? 0.85 : 0.28;
+  const y0 = d.kind === "hill" ? 0.7 : 0.32;
   return {
-    p: new THREE.Vector3(d.x + (fx / fl) * dist, height + y0, d.z + (fz / fl) * dist),
+    p: new THREE.Vector3(d.x + (fx / fl) * dist, height, d.z + (fz / fl) * dist),
     t: new THREE.Vector3(d.x, y0, d.z),
   };
+}
+
+function declutterLabels(camera, controls) {
+  const w = stage.clientWidth || window.innerWidth;
+  const h = stage.clientHeight || window.innerHeight;
+  const narrowUi = window.innerWidth < 760;
+  const top = narrowUi ? 158 : 110;
+  const bot = 42;
+  const dist = camera.position.distanceTo(controls.target);
+  const close = dist < 9;
+  const items = [];
+  for (const d of districts.values()) {
+    const show = !close || d.id === selected || (searchOn && hot.has(d.id));
+    d.pin.style.visibility = show ? "visible" : "hidden";
+    if (!show) { d.pin.style.translate = "0px 0px"; continue; }
+    const v = new THREE.Vector3(d.x, 1.2, d.z).project(camera);
+    if (v.z < -1 || v.z > 1) { d.pin.style.visibility = "hidden"; continue; }
+    const ax = (v.x * 0.5 + 0.5) * w;
+    const ay = (-v.y * 0.5 + 0.5) * h;
+    items.push({
+      d, ax, ay, x: ax, y: ay,
+      hw: Math.max(28, d.pin.offsetWidth / 2),
+      hh: Math.max(11, d.pin.offsetHeight / 2),
+    });
+  }
+  const clamp = (it) => {
+    it.x = Math.max(it.hw + 4, Math.min(w - it.hw - 4, it.x));
+    it.y = Math.max(top + it.hh, Math.min(h - bot - it.hh, it.y));
+  };
+  for (let n = 0; n < 14; n++) {
+    for (const it of items) clamp(it);
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        const a = items[i], b = items[j];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        const gapX = a.hw + b.hw + 10;
+        const gapY = a.hh + b.hh + 8;
+        if (Math.abs(dx) >= gapX || Math.abs(dy) >= gapY) continue;
+        const px = (gapX - Math.abs(dx)) * 0.5;
+        const py = (gapY - Math.abs(dy)) * 0.5;
+        if (px < py) {
+          const s = dx === 0 ? (i % 2 ? 1 : -1) : Math.sign(dx);
+          a.x -= s * px; b.x += s * px;
+        } else {
+          const s = dy === 0 ? 1 : Math.sign(dy);
+          a.y -= s * py; b.y += s * py;
+        }
+      }
+    }
+    if (n < 8) {
+      for (const it of items) {
+        it.x += (it.ax - it.x) * 0.14;
+        it.y += (it.ay - it.y) * 0.06;
+      }
+    }
+  }
+  for (const it of items) clamp(it);
+  for (const it of items) {
+    it.d.pin.style.translate = `${Math.round(it.x - it.ax)}px ${Math.round(it.y - it.ay)}px`;
+  }
 }
 
 function shapeOf(poly) {
@@ -419,13 +485,23 @@ function buildLand(scene, lambert) {
       openTopic(id);
     });
     const label = new CSS2DObject(lab);
-    label.center.set(0.5, 1);
-    const lift = TOWNS[id].kind === "hill" ? 2.15 : 1.45;
+    label.center.set(0.5, 0);
+    const lift = TOWNS[id].kind === "hill" ? 1.35 : 0.7;
     label.position.set(cell.anchor[0], lift, cell.anchor[1]);
     root.add(label);
 
+    ground.material.polygonOffset = true;
+    ground.material.polygonOffsetFactor = 1;
+    ground.material.polygonOffsetUnits = 1;
     ground.userData.topic = id;
     pickables.push(ground);
+
+    const edge = new THREE.Mesh(
+      ribbonGeo(cell.poly, 0.03, 0.08),
+      new THREE.MeshBasicMaterial({ color: 0x3f3428, transparent: true, opacity: 0.78, depthWrite: false })
+    );
+    edge.renderOrder = 2;
+    root.add(edge);
 
     if (id === "internal") {
       const coast = new THREE.Mesh(ribbonGeo(layout.taiwan, 0.055, 0.045), new THREE.MeshBasicMaterial({ color: 0x6d7c58 }));
@@ -759,8 +835,8 @@ function planTown(id, town, cell, rand) {
   const perp = [-dir[1], dir[0]];
   const shops = shopBudget(id);
   const span = Math.sqrt(Math.max(0.35, cell.area));
-  const spacing = THREE.MathUtils.clamp(span * 0.16, 0.26, 0.44);
-  const sideOff = THREE.MathUtils.clamp(span * 0.12, 0.16, 0.32);
+  const spacing = 0.54;
+  const sideOff = 0.46;
   const houses = [];
   const roads = [];
   const lanterns = [];
@@ -770,7 +846,6 @@ function planTown(id, town, cell, rand) {
   const fields = [];
   const segments = [];
   const kind = town.kind;
-  const rows = shops > 18 ? 2 : 1;
 
   const placeHouse = (x, z, y, rot, scaleY, opts = {}) => {
     if (!pointInPoly(poly, x, z) && kind !== "penghu") return false;
@@ -785,9 +860,9 @@ function planTown(id, town, cell, rand) {
     const signs = SIGN_FOR[kind] || SIGN_FOR.default;
     houses.push({
       x, y, z, rot,
-      sx: 0.92 + rand() * 0.2,
-      sy: scaleY * (kind === "penghu" ? 0.72 : kind === "hakka" ? 0.86 : 1),
-      sz: 0.96,
+      sx: 1,
+      sy: (kind === "penghu" ? 0.78 : 1) * Math.min(1, scaleY),
+      sz: 1,
       wall,
       roof: roofs[Math.floor(rand() * roofs.length)],
       sign: rand() > 0.28 ? signs[Math.floor(rand() * signs.length)] : -1,
@@ -796,7 +871,7 @@ function planTown(id, town, cell, rand) {
     const front = rot;
     const fx = Math.sin(front), fz = Math.cos(front);
     const rx = Math.cos(front), rz = -Math.sin(front);
-    const hy = y + 0.34 * scaleY;
+    const hy = y + 0.42 * Math.min(1, scaleY);
     lanterns.push({ x: x + fx * 0.22 + rx * 0.14, y: hy, z: z + fz * 0.22 + rz * 0.14, s: 0.045, gold: rand() > 0.82, topic: id });
     if (rand() > 0.45) lanterns.push({ x: x + fx * 0.22 - rx * 0.14, y: hy, z: z + fz * 0.22 - rz * 0.14, s: 0.04, gold: false, topic: id });
     if (kind === "indigo" && rand() > 0.4) {
@@ -808,72 +883,114 @@ function planTown(id, town, cell, rand) {
     return true;
   };
 
+  const halfW = spacing * 0.42;
+  const footprintOk = (x, z) => {
+    if (kind === "penghu") return true;
+    return pointInPoly(poly, x, z)
+      && pointInPoly(poly, x + dir[0] * halfW, z + dir[1] * halfW)
+      && pointInPoly(poly, x - dir[0] * halfW, z - dir[1] * halfW);
+  };
+  let streetEnd = [anchor[0], anchor[1]];
+
   if (kind === "hill") {
-    const terraces = Math.min(5, Math.max(3, Math.round(shops / 4)));
-    const per = Math.max(2, Math.round(shops / terraces));
+    const terraces = Math.min(4, Math.max(3, Math.round(shops / 5)));
+    const per = Math.min(4, Math.max(2, Math.round(shops / terraces)));
     for (let row = 0; row < terraces; row++) {
-      const lift = 0.08 + row * 0.2;
-      const along = (row - (terraces - 1) / 2) * 0.5;
+      const lift = 0.06 + row * 0.22;
+      const along = (row - (terraces - 1) / 2) * 0.62;
       const cx = anchor[0] + dir[0] * along;
       const cz = anchor[1] + dir[1] * along;
-      steps.push({
-        x: cx, y: lift - 0.06, z: cz, rot: Math.atan2(dir[0], dir[1]),
-        sx: per * spacing * 0.55, sy: 0.08, sz: 0.42, topic: id,
-      });
+      const placed = [];
       for (let i = 0; i < per; i++) {
-        const t = (i - (per - 1) / 2) * spacing * 0.85;
+        const t = (i - (per - 1) / 2) * spacing;
         const x = cx + perp[0] * t;
         const z = cz + perp[1] * t;
+        if (!footprintOk(x, z)) continue;
         const face = Math.atan2(-dir[0], -dir[1]);
-        placeHouse(x, z, lift, face, 0.9 + rand() * 0.15);
+        if (placeHouse(x, z, lift, face, 1)) placed.push(t);
       }
-      segments.push({
-        ax: cx - perp[0] * per * spacing * 0.4, az: cz - perp[1] * per * spacing * 0.4, ay: lift + 0.02,
-        bx: cx + perp[0] * per * spacing * 0.4, bz: cz + perp[1] * per * spacing * 0.4, by: lift + 0.02,
-      });
-      for (let k = 0; k < 4; k++) {
-        const t = (k / 3 - 0.5) * per * spacing * 0.8;
-        lanterns.push({ x: cx + perp[0] * t, y: lift + 0.55, z: cz + perp[1] * t, s: 0.05, gold: k % 2 === 0, topic: id });
+      if (placed.length) {
+        steps.push({
+          x: cx, y: lift - 0.04, z: cz, rot: Math.atan2(dir[0], dir[1]),
+          sx: (placed.length - 1) * spacing + 0.5, sy: 0.06, sz: 0.36, topic: id,
+        });
+        segments.push({
+          ax: cx + perp[0] * placed[0], az: cz + perp[1] * placed[0], ay: lift + 0.02,
+          bx: cx + perp[0] * placed[placed.length - 1], bz: cz + perp[1] * placed[placed.length - 1], by: lift + 0.02,
+        });
       }
+      streetEnd = [cx, cz];
     }
   } else {
-    const perSide = Math.max(2, Math.ceil(shops / (rows * 2)));
-    const length = Math.max(0.8, (perSide - 1) * spacing);
-    for (let row = 0; row < rows; row++) {
-      const shift = (row - (rows - 1) / 2) * (sideOff * 2 + 0.55);
-      const cx = anchor[0] + perp[0] * shift;
-      const cz = anchor[1] + perp[1] * shift;
+    const wantedPairs = Math.min(kind === "penghu" ? 3 : 8, Math.max(2, Math.ceil(shops / 2)));
+    let perSide = wantedPairs;
+    let ts = [];
+    const collect = (n) => {
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        const t = (i - (n - 1) / 2) * spacing;
+        const ok = [-1, 1].every((side) => footprintOk(
+          anchor[0] + dir[0] * t + perp[0] * side * sideOff,
+          anchor[1] + dir[1] * t + perp[1] * side * sideOff
+        ));
+        if (ok) out.push(t);
+      }
+      return out;
+    };
+    ts = collect(perSide);
+    while (ts.length < Math.min(3, perSide) && perSide > 2) {
+      perSide -= 1;
+      ts = collect(perSide);
+    }
+    if (ts.length < 2) {
+      ts = [];
+      const n = Math.min(5, shops);
+      for (let i = 0; i < n; i++) {
+        const t = (i - (n - 1) / 2) * spacing;
+        if (footprintOk(anchor[0] + dir[0] * t, anchor[1] + dir[1] * t)) ts.push(t);
+      }
+    }
+    if (ts.length >= 2) {
+      const a = ts[0], b = ts[ts.length - 1];
+      const both = [-1, 1].every((side) => footprintOk(
+        anchor[0] + dir[0] * a + perp[0] * side * sideOff,
+        anchor[1] + dir[1] * a + perp[1] * side * sideOff
+      ));
+      const sides = both ? [-1, 1] : [0];
+      const off = both ? sideOff : 0;
       roads.push({
-        x: cx, z: cz, rot: Math.atan2(dir[0], dir[1]),
-        sx: 0.22, sz: length + 0.4,
+        x: anchor[0] + dir[0] * (a + b) / 2,
+        z: anchor[1] + dir[1] * (a + b) / 2,
+        rot: Math.atan2(dir[0], dir[1]),
+        sx: 0.34,
+        sz: Math.abs(b - a) + spacing,
       });
       segments.push({
-        ax: cx - dir[0] * length * 0.48, az: cz - dir[1] * length * 0.48, ay: 0.02,
-        bx: cx + dir[0] * length * 0.48, bz: cz + dir[1] * length * 0.48, by: 0.02,
+        ax: anchor[0] + dir[0] * (a - spacing * 0.15), az: anchor[1] + dir[1] * (a - spacing * 0.15), ay: 0.02,
+        bx: anchor[0] + dir[0] * (b + spacing * 0.15), bz: anchor[1] + dir[1] * (b + spacing * 0.15), by: 0.02,
       });
-      for (let i = 0; i < perSide; i++) {
-        const t = (i - (perSide - 1) / 2) * spacing;
-        for (const side of [-1, 1]) {
-          const x = cx + dir[0] * t + perp[0] * side * sideOff;
-          const z = cz + dir[1] * t + perp[1] * side * sideOff;
-          const face = Math.atan2(-perp[0] * side, -perp[1] * side);
-          placeHouse(x, z, 0, face, 0.92 + rand() * 0.28);
+      for (const t of ts) {
+        for (const side of sides) {
+          const x = anchor[0] + dir[0] * t + perp[0] * side * off;
+          const z = anchor[1] + dir[1] * t + perp[1] * side * off;
+          const face = side === 0
+            ? Math.atan2(perp[0], perp[1])
+            : Math.atan2(-perp[0] * side, -perp[1] * side);
+          placeHouse(x, z, 0, face, 1);
         }
       }
+      const endT = b + 0.9;
+      const ex = anchor[0] + dir[0] * endT, ez = anchor[1] + dir[1] * endT;
+      streetEnd = (kind === "penghu" || pointInPoly(poly, ex, ez)) ? [ex, ez] : [anchor[0] + dir[0] * b, anchor[1] + dir[1] * b];
     }
   }
 
-  if (houses.length < 3) {
-    for (let i = houses.length; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2;
-      placeHouse(anchor[0] + Math.cos(a) * 0.22, anchor[1] + Math.sin(a) * 0.22, 0, a, 0.9);
-    }
-    if (!segments.length) {
-      segments.push({
-        ax: anchor[0] - 0.35, az: anchor[1], ay: 0.02,
-        bx: anchor[0] + 0.35, bz: anchor[1], by: 0.02,
-      });
-    }
+  if (!houses.length) {
+    placeHouse(anchor[0], anchor[1], 0, Math.atan2(dir[0], dir[1]), 1);
+    segments.push({
+      ax: anchor[0] - dir[0] * 0.4, az: anchor[1] - dir[1] * 0.4, ay: 0.02,
+      bx: anchor[0] + dir[0] * 0.4, bz: anchor[1] + dir[1] * 0.4, by: 0.02,
+    });
   }
 
   const fieldN = cell.area > 5 ? Math.min(14, Math.round(cell.area * 0.22)) : 0;
@@ -887,51 +1004,51 @@ function planTown(id, town, cell, rand) {
     fields.push({ x, z, rot: rand() * 3, sx: 0.35 + rand() * 0.45, sz: 0.28 + rand() * 0.4 });
   }
 
-  const landmark = makeLandmark(kind, anchor, dir, id);
+  const landmark = makeLandmark(kind, anchor, dir, id, streetEnd);
   return { houses, roads, lanterns, cloths, herbs, steps, fields, segments, landmark };
 }
 
-function makeLandmark(kind, anchor, dir, id) {
+function makeLandmark(kind, anchor, dir, id, origin) {
+  const base = origin || anchor;
   const rot = Math.atan2(dir[0], dir[1]);
   const buf = { pos: [], col: [], nor: [] };
   const frame = (dx, dz) => {
     const c = Math.cos(rot), s = Math.sin(rot);
-    return [anchor[0] + dx * c + dz * s, anchor[1] - dx * s + dz * c];
+    return [base[0] + dx * c + dz * s, base[1] - dx * s + dz * c];
   };
   const box = (color, x, y, z, sx, sy, sz) => {
     const p = frame(x, z);
     pushBox(buf, color, p[0], y, p[1], sx, sy, sz, rot);
   };
   if (kind === "temple" || kind === "tainan") {
-    box(0xd9cbb0, 0, 0.06, 0.15, 1.15, 0.12, 0.9);
-    for (const x of [-0.38, 0.38]) for (const z of [-0.05, 0.35]) box(0xa33b32, x, 0.38, z, 0.08, 0.52, 0.08);
-    box(0xf3efe4, 0, 0.5, 0.15, 0.7, 0.42, 0.5);
-    pushSwallow(buf, 0x8c2e28, frame, rot, 0, 0.78, 0.15, 1.25, 0.95, 0.42);
-    pushSwallow(buf, 0x7a2a26, frame, rot, 0, 1.05, 0.15, 0.78, 0.62, 0.28);
-    box(0xf0c14e, 0, 0.62, 0.42, 0.16, 0.16, 0.04);
+    box(0xd9cbb0, 0, 0.04, 0.1, 0.7, 0.08, 0.52);
+    for (const x of [-0.22, 0.22]) for (const z of [-0.02, 0.2]) box(0xa33b32, x, 0.22, z, 0.05, 0.32, 0.05);
+    box(0xf3efe4, 0, 0.28, 0.1, 0.42, 0.26, 0.3);
+    pushSwallow(buf, 0x8c2e28, frame, rot, 0, 0.46, 0.1, 0.72, 0.52, 0.16);
+    box(0xf0c14e, 0, 0.36, 0.26, 0.1, 0.1, 0.03);
   } else if (kind === "anping" || kind === "tamsui") {
-    box(0xc4a078, 0, 0.1, 0, 1.15, 0.2, 0.9);
-    box(0xa34738, 0, 0.38, -0.38, 1.05, 0.36, 0.1);
-    box(0xa34738, 0, 0.38, 0.38, 1.05, 0.36, 0.1);
-    box(0xa34738, -0.48, 0.38, 0, 0.12, 0.4, 0.7);
-    box(0xa34738, 0.48, 0.38, 0, 0.12, 0.4, 0.7);
-    for (const x of [-0.48, 0.48]) for (const z of [-0.38, 0.38]) box(0x8d3a30, x, 0.62, z, 0.18, 0.22, 0.18);
-    box(0xf4efe4, 0, 0.72, 0, 0.04, 0.45, 0.04);
-    box(0xc4543a, 0.08, 0.88, 0, 0.16, 0.1, 0.02);
+    box(0xc4a078, 0, 0.06, 0, 0.7, 0.12, 0.52);
+    box(0xa34738, 0, 0.22, -0.2, 0.62, 0.22, 0.06);
+    box(0xa34738, 0, 0.22, 0.2, 0.62, 0.22, 0.06);
+    box(0xa34738, -0.28, 0.22, 0, 0.07, 0.24, 0.42);
+    box(0xa34738, 0.28, 0.22, 0, 0.07, 0.24, 0.42);
+    for (const x of [-0.28, 0.28]) for (const z of [-0.2, 0.2]) box(0x8d3a30, x, 0.38, z, 0.1, 0.12, 0.1);
+    box(0xf4efe4, 0, 0.46, 0, 0.025, 0.28, 0.025);
+    box(0xc4543a, 0.05, 0.56, 0, 0.1, 0.06, 0.015);
     if (kind === "tamsui") {
-      box(0x3d8f9a, -0.15, 0.02, -0.85, 0.7, 0.04, 1.1);
-      box(0x4ea3ac, 0.45, 0.02, -1.15, 0.45, 0.035, 0.7);
+      box(0x3d8f9a, -0.1, 0.02, -0.55, 0.42, 0.03, 0.7);
+      box(0x4ea3ac, 0.28, 0.02, -0.75, 0.28, 0.025, 0.42);
     }
   } else if (kind === "hengchun" || kind === "gate" || kind === "market") {
-    box(0xb7a890, -0.7, 0.16, 0, 0.7, 0.22, 0.16);
-    box(0xb7a890, 0.7, 0.16, 0, 0.7, 0.22, 0.16);
-    box(0xa33b32, -0.34, 0.48, 0, 0.16, 0.7, 0.16);
-    box(0xa33b32, 0.34, 0.48, 0, 0.16, 0.7, 0.16);
-    pushSwallow(buf, 0x8e342c, frame, rot, 0, 0.9, 0, 0.95, 0.55, 0.32);
-    box(0x2c241c, 0, 0.42, 0.02, 0.28, 0.36, 0.06);
+    box(0xb7a890, -0.42, 0.1, 0, 0.4, 0.14, 0.1);
+    box(0xb7a890, 0.42, 0.1, 0, 0.4, 0.14, 0.1);
+    box(0xa33b32, -0.2, 0.3, 0, 0.1, 0.4, 0.1);
+    box(0xa33b32, 0.2, 0.3, 0, 0.1, 0.4, 0.1);
+    pushSwallow(buf, 0x8e342c, frame, rot, 0, 0.52, 0, 0.55, 0.32, 0.14);
+    box(0x2c241c, 0, 0.26, 0.02, 0.16, 0.22, 0.04);
   } else if (kind === "penghu") {
-    box(0xe7dcc4, 0, 0.16, 0, 0.55, 0.28, 0.4);
-    pushSwallow(buf, 0xa34b3c, frame, rot, 0, 0.38, 0, 0.7, 0.55, 0.22);
+    box(0xe7dcc4, 0, 0.1, 0, 0.36, 0.18, 0.26);
+    pushSwallow(buf, 0xa34b3c, frame, rot, 0, 0.24, 0, 0.42, 0.32, 0.12);
   } else {
     return null;
   }
@@ -982,19 +1099,19 @@ function pushSwallow(buf, color, frame, rot, x, y, z, w, d, h) {
 }
 
 function houseWall() {
-  return new THREE.BoxGeometry(0.38, 0.46, 0.3).translate(0, 0.23, -0.02);
+  return new THREE.BoxGeometry(0.4, 0.56, 0.32).translate(0, 0.28, -0.02);
 }
 function houseRoof() {
   const buf = { pos: [], col: [] };
-  const xs = [-0.26, -0.08, 0.08, 0.26];
-  const ridge = [0.22, 0.1, 0.1, 0.22];
-  const eave = [0.04, 0, 0, 0.04];
-  const y0 = 0.46;
+  const xs = [-0.23, -0.07, 0.07, 0.23];
+  const ridge = [0.13, 0.045, 0.045, 0.13];
+  const eave = [0.02, 0, 0, 0.02];
+  const y0 = 0.56;
   function tri(a, b, c) { buf.pos.push(...a, ...b, ...c); }
   for (let i = 0; i < 3; i++) {
     const r1 = [xs[i], y0 + ridge[i], 0], r2 = [xs[i + 1], y0 + ridge[i + 1], 0];
-    const f1 = [xs[i], y0 + eave[i], 0.2], f2 = [xs[i + 1], y0 + eave[i + 1], 0.2];
-    const b1 = [xs[i], y0 + eave[i], -0.22], b2 = [xs[i + 1], y0 + eave[i + 1], -0.22];
+    const f1 = [xs[i], y0 + eave[i], 0.18], f2 = [xs[i + 1], y0 + eave[i + 1], 0.18];
+    const b1 = [xs[i], y0 + eave[i], -0.18], b2 = [xs[i + 1], y0 + eave[i + 1], -0.18];
     tri(f1, f2, r2); tri(f1, r2, r1);
     tri(b2, b1, r1); tri(b2, r1, r2);
   }
@@ -1004,20 +1121,20 @@ function houseRoof() {
   return g;
 }
 function houseArcade() {
-  const g = new THREE.BoxGeometry(0.42, 0.045, 0.16);
-  g.translate(0, 0.32, 0.16);
-  const postL = new THREE.BoxGeometry(0.045, 0.32, 0.045).translate(-0.16, 0.16, 0.2);
-  const postR = new THREE.BoxGeometry(0.045, 0.32, 0.045).translate(0.16, 0.16, 0.2);
+  const g = new THREE.BoxGeometry(0.4, 0.04, 0.12);
+  g.translate(0, 0.4, 0.16);
+  const postL = new THREE.BoxGeometry(0.04, 0.4, 0.04).translate(-0.15, 0.2, 0.18);
+  const postR = new THREE.BoxGeometry(0.04, 0.4, 0.04).translate(0.15, 0.2, 0.18);
   return mergeGeos([g, postL, postR]);
 }
 function houseDoor() {
-  const door = new THREE.BoxGeometry(0.1, 0.22, 0.02).translate(0, 0.11, 0.135);
-  const w1 = new THREE.BoxGeometry(0.07, 0.07, 0.02).translate(-0.1, 0.28, 0.135);
-  const w2 = new THREE.BoxGeometry(0.07, 0.07, 0.02).translate(0.1, 0.28, 0.135);
+  const door = new THREE.BoxGeometry(0.12, 0.32, 0.02).translate(0, 0.16, 0.145);
+  const w1 = new THREE.BoxGeometry(0.07, 0.07, 0.02).translate(-0.1, 0.36, 0.145);
+  const w2 = new THREE.BoxGeometry(0.07, 0.07, 0.02).translate(0.1, 0.36, 0.145);
   return mergeGeos([door, w1, w2]);
 }
 function houseSign() {
-  return new THREE.BoxGeometry(0.22, 0.1, 0.02).translate(0, 0.4, 0.25);
+  return new THREE.BoxGeometry(0.2, 0.08, 0.02).translate(0, 0.5, 0.22);
 }
 function mergeGeos(list) {
   let count = 0;
@@ -1189,7 +1306,7 @@ function buildCrowd(scene) {
   people.forEach((p, i) => {
     aA.set([p.ax, p.ay, p.az, p.phase], i * 4);
     aB.set([p.bx, p.by, p.bz, p.speed], i * 4);
-    aP.set([p.stop, p.hat, p.fem, p.scale * 1.7], i * 4);
+    aP.set([p.stop, p.hat, p.fem, p.scale * 0.62], i * 4);
     const col = new THREE.Color(p.robe);
     aC.set([col.r, col.g, col.b, p.face], i * 4);
   });
@@ -1278,10 +1395,10 @@ function buildLinks(scene) {
     const p = new THREE.Vector3(a.x, 0.2, a.z).addScaledVector(dir, inset);
     const q = new THREE.Vector3(b.x, 0.2, b.z).addScaledVector(dir, -inset);
     const mid = p.clone().lerp(q, 0.5);
-    mid.y += 1.6 + Math.min(2.4, len * 0.08);
+    mid.y += 0.28;
     const curve = new THREE.QuadraticBezierCurve3(p, mid, q);
     const N = 8;
-    const half = 0.03 + Math.min(0.09, w / 110);
+    const half = 0.012;
     const positions = [];
     const index = [];
     for (let i = 0; i <= N; i++) {
@@ -1301,10 +1418,10 @@ function buildLinks(scene) {
     geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     geo.setIndex(index);
     const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-      color: 0xe6c36a, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide,
+      color: 0xd9c48a, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide,
     }));
     mesh.renderOrder = 1;
-    mesh.visible = w >= 8;
+    mesh.visible = false;
     scene.add(mesh);
     links.push({ a: aId, b: bId, w, mesh });
   }
@@ -1340,9 +1457,8 @@ function refreshGlow() {
   for (const link of links) {
     const touch = selected && (link.a === selected || link.b === selected);
     const both = searchOn && hot.has(link.a) && hot.has(link.b);
-    link.mesh.visible = link.w >= 8 || touch || both;
-    const t = Math.min(1, link.w / 40);
-    link.mesh.material.opacity = touch || both ? 0.55 + 0.4 * t : 0.28 + 0.35 * t;
+    link.mesh.visible = Boolean(touch || both);
+    link.mesh.material.opacity = touch || both ? 0.12 : 0;
   }
   listBody.querySelectorAll("[data-topic]").forEach((btn) => {
     btn.classList.toggle("hot", searchOn && hot.has(btn.dataset.topic));

@@ -1,4 +1,6 @@
-// Taiwan old-town layout. x = east, y = north (becomes +Z in the 3D scene).
+// Taiwan old-town layout. y = north (becomes +Z).
+// x is negated: the camera looks north, and in that view screen-right is world -X,
+// so geographic east is stored as negative x and appears on the right.
 // District areas follow video counts; each town seed stays inside its own land.
 
 const LON0 = 120.95;
@@ -7,23 +9,22 @@ const COS = Math.cos((LAT0 * Math.PI) / 180);
 const SCALE = 6.62;
 
 export function project(lon, lat) {
-  return [(lon - LON0) * COS * SCALE, (lat - LAT0) * SCALE];
+  return [-(lon - LON0) * COS * SCALE, (lat - LAT0) * SCALE];
 }
 
+// Upright sweet potato: narrow north, straightish east coast, bulging west, thin southern tail.
 const TAIWAN_LL = [
-  [121.538, 25.298], [121.620, 25.268], [121.690, 25.210], [121.748, 25.168],
-  [121.800, 25.150], [121.860, 25.142], [121.930, 25.118], [121.992, 25.010],
-  [121.900, 24.930], [121.835, 24.820], [121.800, 24.700], [121.855, 24.595],
-  [121.790, 24.430], [121.710, 24.250], [121.635, 24.040], [121.555, 23.780],
-  [121.500, 23.500], [121.455, 23.240], [121.350, 22.980], [121.200, 22.760],
-  [121.070, 22.540], [120.990, 22.340], [120.900, 22.180], [120.850, 21.990],
-  [120.835, 21.895], [120.760, 21.960], [120.670, 22.080], [120.620, 22.220],
-  [120.580, 22.380], [120.490, 22.500], [120.360, 22.580], [120.260, 22.670],
-  [120.190, 22.820], [120.140, 22.980], [120.085, 23.140], [120.065, 23.320],
-  [120.095, 23.500], [120.135, 23.680], [120.110, 23.840], [120.200, 23.980],
-  [120.360, 24.110], [120.490, 24.260], [120.620, 24.450], [120.760, 24.660],
-  [120.920, 24.840], [121.070, 25.000], [121.210, 25.130], [121.360, 25.185],
-  [121.445, 25.240], [121.500, 25.285],
+  [121.38, 25.17], [121.46, 25.28], [121.56, 25.30], [121.68, 25.22],
+  [121.80, 25.14], [121.90, 25.12], [121.96, 25.02],
+  [121.90, 24.82], [121.84, 24.62], [121.78, 24.40], [121.70, 24.16],
+  [121.64, 23.92], [121.60, 23.68], [121.54, 23.44], [121.46, 23.20],
+  [121.34, 22.96], [121.18, 22.74], [121.02, 22.52], [120.92, 22.30],
+  [120.86, 22.08], [120.84, 21.94], [120.78, 21.90], [120.72, 21.96],
+  [120.66, 22.08], [120.60, 22.22], [120.50, 22.36], [120.38, 22.48],
+  [120.26, 22.62], [120.16, 22.80], [120.08, 23.00], [120.05, 23.20],
+  [120.08, 23.42], [120.14, 23.64], [120.22, 23.86], [120.34, 24.06],
+  [120.48, 24.24], [120.64, 24.42], [120.80, 24.60], [120.96, 24.78],
+  [121.12, 24.96], [121.26, 25.08],
 ];
 
 const RIDGE_LL = [
@@ -60,10 +61,10 @@ export const TOWNS = {
 const MAIN_IDS = Object.keys(TOWNS).filter((id) => id !== "other");
 
 export const LAND = {
-  internal: 0xd2c09a, basic: 0xcbb892, tuina: 0xb7c48a, food: 0xc5d29a,
-  mind: 0xa8c09a, herb: 0xd8c8a4, skin: 0x9bb48a, season: 0xb5d0a0,
-  eent: 0x8ea37a, onco: 0xcfc4a2, gyn: 0xe0d2ae, ped: 0xc2c896,
-  acu: 0xd8cfae, formula: 0xe4d8b4, diag: 0xd0c098, other: 0xe6d7b4,
+  internal: 0xd7bc6e, basic: 0xd08962, tuina: 0x86b06a, food: 0xc6ce72,
+  mind: 0x6eae98, herb: 0xe0a86a, skin: 0x5f9488, season: 0x9cc484,
+  eent: 0x8a9458, onco: 0xc8b07a, gyn: 0xe4c898, ped: 0xa8c47a,
+  acu: 0xd4c498, formula: 0xe8d4a0, diag: 0xc47848, other: 0xf0e0bc,
 };
 
 const PENGHU_LOCAL = [
@@ -381,6 +382,9 @@ export function buildIsland(counts) {
     if (!poly || !pointInPoly(poly, seeds[k][0], seeds[k][1])) {
       const s = seeds[k];
       poly = ensureCCW([[s[0] - 0.45, s[1] - 0.36], [s[0] + 0.45, s[1] - 0.3], [s[0] + 0.36, s[1] + 0.4], [s[0] - 0.4, s[1] + 0.32]]);
+    } else {
+      const grown = expandPoly(poly, 0.028);
+      if (grown.length >= 3 && pointInPoly(grown, seeds[k][0], seeds[k][1])) poly = ensureCCW(grown);
     }
     cells[id] = {
       id,
