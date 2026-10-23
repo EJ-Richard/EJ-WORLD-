@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd4ff">
+<meta name="description" content="戰鬥陀螺 X：思語弟弟的對戰場。組裝陀螺、決定力道和拉速，在極限戰鬥盤跟電腦對戰。">
+<title>戰鬥陀螺 X｜思語弟弟的對戰場</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "../island/vendor/three/build/three.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="brand">
+      <span class="mini-top" aria-hidden="true"></span>
+      <div>
+        <p class="kicker">BEYBLADE X</p>
+        <h1>戰鬥陀螺 X</h1>
+      </div>
+    </div>
+    <button id="btn-mute" type="button" aria-pressed="false">音效開</button>
+  </header>
+
+  <main id="main">
+    <section id="screen-home" class="screen on">
+      <div class="hero">
+        <div class="hero-top" aria-hidden="true"></div>
+        <p class="eyebrow">思語弟弟 vs 電腦</p>
+        <h2>思語弟弟的對戰場</h2>
+        <p class="lead">組裝一顆真正的戰鬥陀螺，拉繩發射，在極限戰鬥盤裡對戰。先得到 4 分的人獲勝。</p>
+        <p id="record-line" class="record">戰績　勝 0　敗 0</p>
+        <div class="hero-actions">
+          <button id="btn-start" class="primary" type="button">開始對戰</button>
+          <button id="btn-help" class="ghost" type="button">怎麼玩</button>
+        </div>
+        <ol class="steps">
+          <li><b>1</b>選陀螺、棘輪、尖軸、發射器和握把</li>
+          <li><b>2</b>決定放下的位置、力道和拉速</li>
+          <li><b>3</b>倒數 Go Shoot! 之後就不能控制了</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="screen-build" class="screen">
+      <div id="match-strip" class="match-strip" hidden></div>
+      <div class="build-head">
+        <h2>陀螺組裝</h2>
+        <div class="seg" role="tablist" aria-label="編輯哪一邊">
+          <button id="side-player" type="button" data-side="player">思語弟弟</button>
+          <button id="side-cpu" type="button" data-side="cpu">電腦對手</button>
+        </div>
+        <div class="seg" role="group" aria-label="難度">
+          <button type="button" data-diff="easy">簡單</button>
+          <button type="button" data-diff="normal">普通</button>
+          <button type="button" data-diff="hard">困難</button>
+        </div>
+      </div>
+      <p id="vs-line" class="vs-line"></p>
+      <div class="filters">
+        <div class="chips" id="series-chips" role="group" aria-label="系列">
+          <button type="button" data-series="ALL">全部</button>
+          <button type="button" data-series="BX" class="bx">BX</button>
+          <button type="button" data-series="UX" class="ux">UX</button>
+          <button type="button" data-series="CX" class="cx">CX</button>
+        </div>
+        <div class="chips" id="type-chips" role="group" aria-label="戰鬥類型">
+          <button type="button" data-type="ALL">全部</button>
+          <button type="button" data-type="攻擊" class="t-atk">攻擊</button>
+          <button type="button" data-type="防禦" class="t-def">防禦</button>
+          <button type="button" data-type="耐久" class="t-sta">耐久</button>
+          <button type="button" data-type="平衡" class="t-bal">平衡</button>
+        </div>
+        <input id="top-search" type="search" placeholder="搜尋名稱或編號" aria-label="搜尋陀螺" autocomplete="off">
+      </div>
+      <div class="build-grid">
+        <div class="list-col">
+          <div id="top-list" role="listbox" aria-label="陀螺清單"></div>
+        </div>
+        <div class="part-col" id="part-col">
+          <p id="combo-label" class="combo"></p>
+          <h3>棘輪 Ratchet</h3>
+          <div id="part-ratchets" class="chips scroll"></div>
+          <h3>尖軸 Bit</h3>
+          <div id="part-bits" class="chips scroll"></div>
+          <h3>發射器</h3>
+          <div id="part-launchers" class="chips scroll"></div>
+          <h3>握把</h3>
+          <div id="part-grips" class="chips scroll"></div>
+          <div id="stat-bars" class="stats"></div>
+          <p id="part-tip" class="tip"></p>
+          <div class="row-actions">
+            <button id="btn-random-cpu" type="button" class="ghost">隨機對手</button>
+            <button id="btn-build-back" type="button" class="ghost">返回</button>
+            <button id="btn-to-launch" type="button" class="primary">前往發射</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-launch" class="screen">
+      <div class="launch-head">
+        <h2>發射準備</h2>
+        <p>先選放下的位置和角度，再停住力道、快速拉繩。倒數結束就一起發射。</p>
+      </div>
+      <div class="launch-grid">
+        <div class="map-card">
+          <h3>放下的位置</h3>
+          <canvas id="drop-map" width="640" height="640" aria-label="戰鬥盤俯瞰圖，點一下放下，拖曳決定發射方向"></canvas>
+          <label class="tilt-label">往外傾斜 <output id="tilt-val">0</output>
+            <input id="tilt" type="range" min="-100" max="100" value="5" aria-label="發射傾斜">
+          </label>
+          <p class="hint">靠近極限線比較容易衝刺，放中間比較能持久。箭頭是發射方向。</p>
+        </div>
+        <div class="meter-card">
+          <h3>力道</h3>
+          <div id="power-meter" aria-hidden="true"><div id="power-cursor"></div></div>
+          <p id="power-readout">指針移動中，按「停！」</p>
+          <button id="btn-power" type="button" class="primary">停！決定力道</button>
+          <h3>拉速</h3>
+          <div id="pull-pad" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="拉繩速度">
+            <div id="pull-cord"></div>
+            <p>快速向上滑動，或連按空白鍵</p>
+            <div id="pull-gauge"><span></span></div>
+          </div>
+          <p id="pull-readout">還沒拉繩</p>
+          <button id="btn-repull" type="button" class="ghost">重拉</button>
+        </div>
+        <div class="shoot-card">
+          <p id="player-plan"></p>
+          <p id="cpu-plan"></p>
+          <ul class="check" id="ready-check">
+            <li id="check-drop">位置</li>
+            <li id="check-power">力道</li>
+            <li id="check-pull">拉速</li>
+          </ul>
+          <button id="btn-shoot" type="button" class="primary" disabled>Go Shoot!</button>
+          <button id="btn-launch-back" type="button" class="ghost">回組裝</button>
+          <p class="hint">空白鍵可以停力道，之後快速連按空白鍵拉繩，Enter 發射。</p>
+        </div>
+      </div>
+      <div id="countdown" hidden>3</div>
+    </section>
+
+    <section id="screen-battle" class="screen">
+      <div id="hud">
+        <div class="hud-side player">
+          <p class="who">思語弟弟</p>
+          <p id="hud-p-name" class="hud-name"></p>
+          <p id="hud-p-code" class="hud-sub"></p>
+          <div class="spinbar"><span id="hud-p-spin"></span></div>
+          <p class="rpm"><span id="hud-p-rpm">0</span> RPM <em id="hud-p-dash" hidden>極限衝刺</em></p>
+        </div>
+        <div class="hud-mid">
+          <p id="hud-round">第 1 回合</p>
+          <p class="scoreline"><b id="hud-p-score">0</b><span>先到 4 分</span><b id="hud-c-score">0</b></p>
+        </div>
+        <div class="hud-side cpu">
+          <p class="who">電腦</p>
+          <p id="hud-c-name" class="hud-name"></p>
+          <p id="hud-c-code" class="hud-sub"></p>
+          <div class="spinbar cpu"><span id="hud-c-spin"></span></div>
+          <p class="rpm"><span id="hud-c-rpm">0</span> RPM <em id="hud-c-dash" hidden>極限衝刺</em></p>
+        </div>
+      </div>
+      <div id="battle-view"></div>
+      <div id="go-flash" hidden>Go Shoot!</div>
+      <div id="finish-banner" hidden>
+        <div class="confetti" aria-hidden="true"></div>
+        <p id="banner-who"></p>
+        <h2 id="banner-zh">持久終結</h2>
+        <p id="banner-en">Spin Finish</p>
+        <p id="banner-pts" class="pts">+1</p>
+        <div class="row-actions">
+          <button id="btn-retune" type="button" class="ghost">調整零件</button>
+          <button id="btn-next" type="button" class="primary">下一回合</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen">
+      <div class="result-card">
+        <p id="result-kicker" class="eyebrow">比賽結束</p>
+        <h2 id="result-title">思語弟弟 獲勝！</h2>
+        <p id="result-score" class="result-score">4 : 0</p>
+        <ol id="history"></ol>
+        <p id="record-after" class="record"></p>
+        <div class="row-actions">
+          <button id="btn-rematch" type="button" class="primary">再戰一場</button>
+          <button id="btn-rebuild" type="button" class="ghost">換陀螺</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-foot">
+    <span>非官方・粉絲EJ製作</span>
+    <a href="https://ej-richard.github.io/beyblade-x/" target="_blank" rel="noopener noreferrer">思語弟弟的陀螺世界</a>
+  </footer>
+</div>
+
+<div id="help" hidden>
+  <div class="help-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <h2 id="help-title">怎麼玩</h2>
+    <p>你是思語弟弟。選一顆目錄裡的戰鬥陀螺，可以改棘輪、尖軸、發射器和握把。左迴旋會反方向轉，跟右迴旋對撞時搶得比較用力。</p>
+    <p>發射時你決定三件事：戰鬥盤上的放下位置和角度、力道、拉繩速度。3、2、1、Go Shoot! 之後就不能再控制。</p>
+    <ul>
+      <li>持久終結 Spin Finish：對方先停轉，1 分</li>
+      <li>出場終結 Over Finish：打進出場區，2 分</li>
+      <li>爆裂終結 Burst Finish：打到爆開，2 分</li>
+      <li>極限終結 Xtreme Finish：打進極限區，3 分</li>
+    </ul>
+    <p>攻擊型又快又會彈，咬到極限線會衝刺。防禦型比較重。耐久型轉比較久。平衡型在中間。先得到 4 分就贏。</p>
+    <button id="btn-help-close" type="button" class="primary">知道了</button>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
