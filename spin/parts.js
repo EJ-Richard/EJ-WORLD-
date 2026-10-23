@@ -1,9 +1,9 @@
 import { TOPS, LAUNCHERS, GRIPS } from "./data.js";
 
 export const SERIES_COLOR = {
-  BX: "#1f6bff",
-  UX: "#ff4b2b",
-  CX: "#8a3dff",
+  BX: "#1d4ed8",
+  UX: "#c2410c",
+  CX: "#7e22ce",
 };
 
 export const RATCHET_CHOICES = [

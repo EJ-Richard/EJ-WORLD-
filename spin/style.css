@@ -3,13 +3,13 @@
   --muted: #3a3560;
   --card: #fffdf8;
   --line: #1b1b3a;
-  --bx: #1f6bff;
-  --ux: #ff4b2b;
-  --cx: #8a3dff;
-  --atk: #ff3b4e;
-  --def: #1fa85a;
-  --sta: #e39b00;
-  --bal: #7a5cff;
+  --bx: #1d4ed8;
+  --ux: #c2410c;
+  --cx: #7e22ce;
+  --atk: #a61b1b;
+  --def: #075985;
+  --sta: #166534;
+  --bal: #8a4b00;
   --yellow: #ffe14a;
   --pink: #ff8bd2;
   --shadow: 4px 4px 0 var(--line);
@@ -53,7 +53,7 @@ button:focus-visible, input:focus-visible, #pull-pad:focus-visible {
 .kicker, .eyebrow { margin: 0; font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 800; color: var(--ux); }
 .mini-top, .hero-top {
   width: 36px; height: 36px; border-radius: 50%;
-  background: conic-gradient(#1f6bff, #ff4b2b, #8a3dff, #ffe14a, #1f6bff);
+  background: conic-gradient(#1d4ed8 0 33%, #c2410c 0 66%, #7e22ce 0);
   border: 3px solid var(--line);
   box-shadow: 2px 2px 0 var(--line);
   animation: spin 2.6s linear infinite;
@@ -122,13 +122,20 @@ button:focus-visible, input:focus-visible, #pull-pad:focus-visible {
   min-height: 40px;
 }
 .seg button.is-on, .chips button.is-on { background: var(--ink); color: #fff; }
-.chips button.bx.is-on { background: var(--bx); }
-.chips button.ux.is-on { background: var(--ux); }
-.chips button.cx.is-on { background: var(--cx); }
-.chips button.t-atk.is-on { background: var(--atk); }
-.chips button.t-def.is-on { background: var(--def); }
-.chips button.t-sta.is-on { background: var(--sta); color: var(--ink); }
-.chips button.t-bal.is-on { background: var(--bal); }
+.chips button.bx { background: #e6efff; color: #1e3a8a; }
+.chips button.ux { background: #fff0e6; color: #9a3412; }
+.chips button.cx { background: #f4ebff; color: #6b21a8; }
+.chips button.bx.is-on { background: var(--bx); color: #fff; }
+.chips button.ux.is-on { background: var(--ux); color: #fff; }
+.chips button.cx.is-on { background: var(--cx); color: #fff; }
+.chips button.t-atk { background: #ffe9e9; color: var(--atk); }
+.chips button.t-def { background: #e3f3ff; color: var(--def); }
+.chips button.t-sta { background: #e4f8ec; color: var(--sta); }
+.chips button.t-bal { background: #fdf0dc; color: var(--bal); }
+.chips button.t-atk.is-on { background: var(--atk); color: #fff; }
+.chips button.t-def.is-on { background: var(--def); color: #fff; }
+.chips button.t-sta.is-on { background: var(--sta); color: #fff; }
+.chips button.t-bal.is-on { background: var(--bal); color: #fff; }
 .filters { padding: 0 12px 8px; display: grid; gap: 6px; }
 #top-search, .tilt-label input {
   width: 100%;
@@ -180,6 +187,11 @@ button:focus-visible, input:focus-visible, #pull-pad:focus-visible {
   border: 2px solid var(--line);
   background: #fff;
 }
+.badge.t-atk { background: #ffe9e9; color: var(--atk); }
+.badge.t-def { background: #e3f3ff; color: var(--def); }
+.badge.t-sta { background: #e4f8ec; color: var(--sta); }
+.badge.t-bal { background: #fdf0dc; color: var(--bal); }
+.col-title { margin: 0 0 6px; font-size: 1rem; }
 .left-badge { background: #ffd0d0; }
 .part-col h3 { display: inline-flex; margin: 8px 8px 6px 0; background: transparent; border: 0; padding: 0; min-height: 0; }
 .chips.scroll { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }

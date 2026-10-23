@@ -174,7 +174,7 @@ function buildStadium(scene) {
   ground.position.y = -0.04;
   scene.add(ground);
 
-  const flagColors = ["#ff4b2b", "#ffe14a", "#1f6bff", "#8a3dff", "#3ddc7a", "#ff7ad9", "#ff9f1c", "#5ce1ff"];
+  const flagColors = ["#c2410c", "#ffe14a", "#1d4ed8", "#7e22ce", "#3ddc7a", "#ff7ad9", "#ff9f1c", "#5ce1ff"];
   flagColors.forEach((color, i) => {
     const a = (i / flagColors.length) * Math.PI * 2 + 0.2;
     const pole = new THREE.Mesh(

@@ -81,6 +81,14 @@ function saveJSON(key, value) {
   }
 }
 
+function saveLoadout() {
+  saveJSON("spin-x-loadout", {
+    difficulty: state.difficulty,
+    player: state.player,
+    cpu: state.cpu,
+  });
+}
+
 function sideStats(which) {
   const side = state[which];
   return computeStats(getTop(side.topId), side.ratchet, side.bit, side.launcherId, side.gripId);
@@ -142,7 +150,8 @@ function renderList() {
     nm.className = "nm";
     nm.textContent = topLabel(top);
     const meta = document.createElement("span");
-    meta.className = "badge";
+    const typeClass = { 攻擊: "t-atk", 防禦: "t-def", 耐久: "t-sta", 平衡: "t-bal" };
+    meta.className = `badge ${typeClass[top.type] || ""}`;
     meta.textContent = top.type;
     btn.append(sw, code, nm, meta);
     if (top.left_spin) {
@@ -423,11 +432,7 @@ function enterLaunch() {
   state.pull = 0;
   state.powerT0 = performance.now();
   planCpu();
-  saveJSON("spin-x-loadout", {
-    difficulty: state.difficulty,
-    player: state.player,
-    cpu: state.cpu,
-  });
+  saveLoadout();
   show("launch");
   requestAnimationFrame(() => {
     drawMap();
@@ -561,6 +566,9 @@ function showResult() {
   saveJSON("spin-x-record", state.record);
   $("result-title").textContent = playerWins ? "思語弟弟 獲勝！" : "電腦 獲勝！";
   $("result-score").textContent = `${state.match.player} : ${state.match.cpu}`;
+  const p = sideStats("player");
+  const c = sideStats("cpu");
+  $("result-loadout").textContent = `思語弟弟　${p.label} ${p.code} ${p.combo}　vs　電腦　${c.label} ${c.code} ${c.combo}`;
   const list = $("history");
   list.replaceChildren();
   for (const row of state.match.history) {
@@ -626,6 +634,7 @@ function wire() {
   document.querySelectorAll("[data-diff]").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.difficulty = btn.dataset.diff;
+      saveLoadout();
       renderParts();
     });
   });
@@ -655,6 +664,7 @@ function wire() {
     side.topId = top.id;
     side.ratchet = top.ratchet;
     side.bit = top.bit;
+    saveLoadout();
     audio.blip(560);
     renderBuild();
   });
@@ -662,6 +672,7 @@ function wire() {
     const btn = event.target.closest("[data-k]");
     if (!btn) return;
     state[state.side][btn.dataset.k] = btn.dataset.v;
+    saveLoadout();
     renderParts();
   });
   $("btn-random-cpu").addEventListener("click", () => {
@@ -673,6 +684,7 @@ function wire() {
     state.cpu.launcherId = LAUNCHERS[Math.floor(Math.random() * LAUNCHERS.length)].id;
     state.cpu.gripId = GRIPS[Math.floor(Math.random() * GRIPS.length)].id;
     state.side = "cpu";
+    saveLoadout();
     renderBuild();
   });
   $("btn-build-back").addEventListener("click", () => {
