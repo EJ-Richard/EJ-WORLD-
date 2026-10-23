@@ -42,12 +42,12 @@ a { color: var(--jade); }
   color: var(--ink);
   border-radius: 999px;
   padding: 2px 9px 2px 2px;
-  font: 600 13px/1.2 var(--font);
+  font: 600 12px/1.2 var(--font);
   box-shadow: 0 2px 8px rgba(58, 50, 38, 0.16);
   white-space: nowrap;
 }
 .pin .seal, .brand .seal, .mini-seal {
-  width: 22px; height: 22px; border-radius: 50%;
+  min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; white-space: nowrap;
   background: var(--jade); color: #fff;
   display: grid; place-items: center;
   font-family: var(--serif); font-weight: 700; font-size: 13px;
@@ -60,7 +60,8 @@ a { color: var(--jade); }
 .nm.short { display: none; }
 @media (max-width: 760px) {
   .nm.full { display: none; }
-  .pin.on .nm.short, .pin.hot .nm.short { display: inline; }
+  .pin.on .nm.full, body.show-names .pin .nm.full { display: inline; }
+  .pin.on .nm.short, .pin.hot .nm.short { display: none; }
 }
 
 #top {
@@ -73,7 +74,7 @@ a { color: var(--jade); }
 }
 #top > * { pointer-events: auto; }
 .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.brand .seal { width: 36px; height: 36px; font-size: 20px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
+.brand .seal { width: 36px; min-width: 36px; padding: 0; height: 36px; font-size: 20px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
 .brand h1 { margin: 0; font-family: var(--serif); font-size: 22px; letter-spacing: 1px; font-weight: 700; }
 .brand p { margin: 0; color: var(--muted); font-size: 12px; }
 #search-form { margin-left: auto; width: min(360px, 46vw); }
@@ -143,6 +144,13 @@ a { color: var(--jade); }
 .topic-btn .txt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .topic-btn b { font-size: 15px; }
 .topic-btn small { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topic-btn .seal {
+  min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; white-space: nowrap;
+  background: var(--jade); color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--serif); font-weight: 700; font-size: 12px;
+  flex: none;
+}
 .topic-btn em { font-style: normal; color: var(--seal); font-weight: 800; font-size: 16px; }
 
 #panel {
@@ -261,12 +269,12 @@ footer a { font-weight: 800; }
 
 @media (max-width: 760px) {
   .brand h1 { font-size: 18px; }
-  .brand .seal { width: 32px; height: 32px; font-size: 18px; }
+  .brand .seal { width: 32px; min-width: 32px; padding: 0; height: 32px; font-size: 18px; }
   #top { flex-wrap: wrap; padding-top: max(8px, env(safe-area-inset-top)); }
   #search-form { width: 100%; margin-left: 0; }
   .tools { top: 104px; }
   .pin { font-size: 11px; padding: 1px 6px 1px 1px; }
-  .pin .seal { width: 18px; height: 18px; font-size: 12px; }
+  .pin .seal { min-width: 18px; height: 18px; font-size: 11px; padding: 0 4px; }
   #list {
     top: auto; bottom: 0; left: 0; right: 0; width: auto; height: min(78dvh, 640px);
     border-radius: 18px 18px 0 0;

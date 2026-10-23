@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b52">
-<meta name="description" content="大愛學漢醫島：十六座中醫主題園區，沿著症狀、醫師與年份散步找影片。">
+<meta name="description" content="大愛學漢醫島：十六座台灣古城對應中醫主題，沿著老街、症狀、醫師與年份找影片。">
 <title>大愛學漢醫島</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="./style.css">
@@ -19,7 +19,7 @@
 </head>
 <body>
 <div id="app">
-  <div id="stage" role="img" aria-label="十六座中醫主題園區組成的小島。完整文字清單請用清單按鈕。">
+  <div id="stage" role="img" aria-label="十六座中醫主題古城拼成的台灣島，西邊海上是澎湖。完整文字清單請用清單按鈕。">
     <div id="labels"></div>
   </div>
 
@@ -28,7 +28,7 @@
       <span class="seal" aria-hidden="true">島</span>
       <div>
         <h1>大愛學漢醫島</h1>
-        <p id="brand-sub">十六座主題園區</p>
+        <p id="brand-sub">十六座台灣古城</p>
       </div>
     </div>
     <form id="search-form" role="search">
@@ -48,12 +48,12 @@
   <aside id="list" hidden aria-label="主題清單">
     <div class="list-head">
       <div>
-        <p class="eyebrow">十六座園區</p>
+        <p class="eyebrow">十六座古城</p>
         <h2>用清單走一遍</h2>
       </div>
       <button type="button" id="list-close" aria-label="關閉清單">×</button>
     </div>
-    <p class="list-note">點一座園區，鏡頭會飛過去，並打開影片。</p>
+    <p class="list-note">點一座古城，鏡頭會飛進老街，並打開影片。</p>
     <div id="list-body"></div>
   </aside>
 
@@ -91,7 +91,7 @@
   </div>
 
   <div id="live" class="sr" aria-live="polite"></div>
-  <div id="loading" role="status">正在把園區種上小島…</div>
+  <div id="loading" role="status">正在把古城鋪上台灣…</div>
 </div>
 <script src="../data.js"></script>
 <script type="module" src="./app.js"></script>
