@@ -58,6 +58,11 @@ button{font-family:inherit;cursor:pointer}
 .hall-photo img{display:block;width:100%;aspect-ratio:16/10;max-height:220px;object-fit:cover;object-position:center;border-radius:14px;border:2px solid #e0c48a;box-shadow:0 4px 0 #0001;background:#1a3040}
 .hall-credit{margin-top:6px;font-size:12px;line-height:1.45;color:#5a4a32}
 .hall-credit a{color:#8b4513;font-weight:700}
+.hall-gallery{display:none;margin:0 0 12px}
+.hall-gallery.show{display:grid;gap:10px}
+.hall-gallery figure{margin:0}
+.hall-gallery img{display:block;width:100%;aspect-ratio:16/10;max-height:180px;object-fit:cover;object-position:center;border-radius:14px;border:2px solid #e0c48a;box-shadow:0 4px 0 #0001;background:#1a3040}
+.hall-caption{margin-top:6px;font-size:13px;font-weight:800;color:#8b4513}
 .intro{font-size:14px;line-height:1.65;color:#3a3020;margin:0 0 10px}
 .highlights{margin:0 0 14px;padding-left:18px;font-size:13.5px;line-height:1.55;color:#3a3020}
 .highlights li{margin:4px 0}
@@ -170,6 +175,7 @@ button{font-family:inherit;cursor:pointer}
       <img id="hallPhotoImg" alt="" loading="lazy" decoding="async">
       <figcaption class="hall-credit" id="hallPhotoCredit"></figcaption>
     </figure>
+    <div class="hall-gallery" id="hallGallery"></div>
     <h2 id="hallTitle"></h2>
     <div class="region" id="hallRegion"></div>
     <p class="intro" id="hallIntro"></p>
@@ -423,6 +429,9 @@ const HALLS = [
     ],
     stamp:{name:'慈悲科技印', icon:'♻️'},
     photo:{src:'photos/kaohsiung.jpg', alt:'高雄靜思堂外觀', credit:'EJ 提供'},
+    gallery:[
+      {src:'photos/kaohsiung-kids.jpg', alt:'高雄書軒兒童館', caption:'高雄書軒兒童館', credit:'EJ 提供'}
+    ],
     vignette:['#5a8aaa','#2a4a6a'],
     quiz:[
       {q:'高雄靜思堂環教三館包括？', opts:['氣候變遷／低碳生活／慈悲科技','烘焙／咖啡／茶道而已','只有健身房','電競館三樓'], a:0},
@@ -440,6 +449,7 @@ const HALLS = [
       '開放社區共好（依現場公告）'
     ],
     stamp:{name:'桃園印', icon:'✈️'},
+    photo:{src:'photos/taoyuan.jpg', alt:'桃園靜思堂外觀', credit:'EJ 提供'},
     vignette:['#7a9aba','#3a5a7a'],
     quiz:[
       {q:'桃園靜思堂在本遊戲中的角色是？', opts:['北台灣城際巡禮節點與在地服務據點','太空站','海底隧道','唯一的古蹟博物館'], a:0}
@@ -800,6 +810,50 @@ function buildStampRow() {
   $('stampCount').textContent = state.stamps.size;
 }
 
+function fillPhotoCredit(node, photo) {
+  node.replaceChildren();
+  if (photo.href) {
+    node.append('照片：' + photo.author + ' · ');
+    const link = document.createElement('a');
+    link.href = photo.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = photo.license;
+    node.append(link);
+  } else {
+    node.append('照片：' + (photo.credit || photo.author));
+  }
+}
+
+function renderHallGallery(items) {
+  const gallery = $('hallGallery');
+  gallery.replaceChildren();
+  if (!items || !items.length) {
+    gallery.classList.remove('show');
+    return;
+  }
+  items.forEach(item => {
+    const fig = document.createElement('figure');
+    const img = document.createElement('img');
+    img.alt = item.alt || item.caption || '';
+    img.src = item.src;
+    img.decoding = 'async';
+    fig.append(img);
+    if (item.caption) {
+      const cap = document.createElement('div');
+      cap.className = 'hall-caption';
+      cap.textContent = item.caption;
+      fig.append(cap);
+    }
+    const credit = document.createElement('figcaption');
+    credit.className = 'hall-credit';
+    fillPhotoCredit(credit, item);
+    fig.append(credit);
+    gallery.append(fig);
+  });
+  gallery.classList.add('show');
+}
+
 function openHall(id) {
   const hall = HALLS.find(h => h.id === id);
   if (!hall) return;
@@ -816,18 +870,7 @@ function openHall(id) {
     $('hallVig').style.display = 'none';
     img.alt = hall.photo.alt || hall.name;
     img.src = hall.photo.src;
-    credit.replaceChildren();
-    if (hall.photo.href) {
-      credit.append('照片：' + hall.photo.author + ' · ');
-      const link = document.createElement('a');
-      link.href = hall.photo.href;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = hall.photo.license;
-      credit.append(link);
-    } else {
-      credit.append('照片：' + (hall.photo.credit || hall.photo.author));
-    }
+    fillPhotoCredit(credit, hall.photo);
     photo.classList.add('show');
   } else {
     photo.classList.remove('show');
@@ -839,6 +882,7 @@ function openHall(id) {
     $('hallVig').style.background = `linear-gradient(135deg,${c1},${c2})`;
     $('hallVig').textContent = hall.stamp.icon + ' ' + hall.name;
   }
+  renderHallGallery(hall.gallery);
   $('stampUnlock').classList.remove('show');
   $('quizBox').style.display = 'block';
   if (state.stamps.has(id)) {
