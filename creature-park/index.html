@@ -9,10 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0f1a14;--panel:#1a2e24;--panel2:#243d30;--accent:#6ee7a8;--accent2:#fbbf24;--danger:#f87171;--text:#e8f5ee;--muted:#8fb89a;--border:#3d6b52}
+:root{--bg:#0f1a14;--panel:#1a2e24;--panel2:#243d30;--accent:#6ee7a8;--accent2:#fbbf24;--danger:#f87171;--text:#e8f5ee;--muted:#8fb89a;--border:#3d6b52;
+--cream:#fffaf0;--cream2:#fff8e6;--ink:#1f2a44;--inkm:#55627d;--cline:#dbe3f0;
+--s0:#166534;--s0s:#e4f8ec;--s1:#1d4ed8;--s1s:#e6efff;--s2:#7e22ce;--s2s:#f4ebff}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Noto Sans TC",system-ui,sans-serif;overflow:hidden;touch-action:none}
 #app{position:relative;width:100%;height:100%;max-width:480px;margin:0 auto;overflow:hidden}
 #app.battle-mode{max-width:920px}
+#app.dex-mode{max-width:560px}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg)}
 .screen.active{display:flex}
 button{font-family:inherit;border:none;cursor:pointer;touch-action:manipulation}
@@ -21,32 +24,44 @@ button:active{transform:scale(.97)}
 .title-art{width:120px;height:120px;margin-bottom:12px}
 .logo{font-size:2.4rem;font-weight:700;letter-spacing:.12em;color:var(--accent);text-shadow:0 0 24px rgba(110,231,168,.4)}
 .subtitle{color:var(--muted);margin:6px 0 16px;font-size:.95rem}
-.disclaimer{font-size:.7rem;color:#6a8f76;max-width:280px;line-height:1.4;margin-bottom:28px}
+.disclaimer{font-size:.7rem;color:#6a8f76;max-width:300px;line-height:1.45;margin-bottom:20px}
 .btn{background:linear-gradient(180deg,#4ade80,#22c55e);color:#052e16;font-weight:700;font-size:1.1rem;padding:14px 36px;border-radius:999px;box-shadow:0 4px 0 #15803d,0 8px 20px rgba(34,197,94,.3)}
 .btn:active{box-shadow:0 1px 0 #15803d;transform:translateY(3px)}
+.btn:disabled{opacity:.45;filter:grayscale(.4);pointer-events:none}
 .btn-sec{background:var(--panel2);color:var(--text);box-shadow:0 4px 0 #1a2e24;border:1px solid var(--border)}
 .btn-sm{font-size:.9rem;padding:10px 20px}
-#pick{padding:16px 12px 80px;overflow-y:auto;touch-action:pan-y}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+#pick{padding:16px 12px 100px;overflow-y:auto;touch-action:pan-y}
 .pick-head{text-align:center;margin-bottom:12px;position:sticky;top:0;background:var(--bg);z-index:2;padding:8px 0}
 .pick-head h2{color:var(--accent);font-size:1.35rem}
 .pick-head p{color:var(--muted);font-size:.85rem;margin-top:4px}
+.party-slots{display:flex;gap:8px;justify-content:center;margin:10px 0 4px;flex-wrap:wrap}
+.party-slot{width:64px;height:72px;border:2px dashed var(--border);border-radius:12px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.65rem;color:var(--muted)}
+.party-slot.filled{border-style:solid;border-color:var(--accent);color:var(--text)}
+.party-slot canvas{width:40px;height:40px}
+.party-slot .ord{font-weight:700;color:var(--accent2);font-size:.7rem}
 .roster{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{background:var(--panel);border:2px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer}
+.card{background:var(--panel);border:2px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer;position:relative}
 .card:hover,.card.sel{border-color:var(--accent);box-shadow:0 4px 16px rgba(110,231,168,.2)}
+.card.sel::after{content:attr(data-ord);position:absolute;top:6px;right:8px;background:var(--accent);color:#052e16;font-weight:700;font-size:.75rem;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .card canvas{display:block;margin:0 auto 6px}
 .card .name{font-weight:700;font-size:1rem}
 .card .type{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;margin:4px 0;font-weight:600}
+.card .stage{display:inline-block;font-size:.65rem;padding:1px 6px;border-radius:6px;margin-left:4px;background:rgba(110,231,168,.15);color:var(--accent)}
 .card .flavor{font-size:.72rem;color:var(--muted);line-height:1.35;min-height:2.7em}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:.68rem;color:var(--muted);margin-top:6px;text-align:left}
 .stats b{color:var(--text)}
 .moves-mini{font-size:.65rem;color:var(--accent2);margin-top:4px}
-.pick-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(transparent,var(--bg) 30%);padding:16px;display:flex;justify-content:center;z-index:3;pointer-events:none}
+.pick-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(transparent,var(--bg) 30%);padding:16px;display:flex;justify-content:center;gap:8px;z-index:3;pointer-events:none}
 .pick-bar button{pointer-events:auto}
 #map{background:#1a3a28}
 #mapCanvas{display:block;width:100%;height:100%;touch-action:none}
 .hud{position:absolute;top:0;left:0;right:0;padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:5}
 .hud-chip{background:rgba(15,26,20,.85);border:1px solid var(--border);border-radius:10px;padding:6px 10px;font-size:.75rem;pointer-events:auto}
-.hud-chip .pet-name{font-weight:700;color:var(--accent)}
+.hud-party{display:flex;gap:4px;flex-wrap:wrap;max-width:220px}
+.hud-pet{display:inline-flex;align-items:center;gap:3px;background:rgba(110,231,168,.12);border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-size:.68rem}
+.hud-pet .pn{font-weight:700;color:var(--accent)}
+.hud-pet .php{color:var(--muted)}
 .buff{background:rgba(251,191,36,.2);border-color:var(--accent2);color:var(--accent2);margin-top:4px}
 .zone-tag{position:absolute;top:48px;left:50%;transform:translateX(-50%);background:rgba(15,26,20,.8);padding:4px 14px;border-radius:999px;font-size:.8rem;border:1px solid var(--border);z-index:5;pointer-events:none}
 .stick-wrap{position:absolute;bottom:24px;left:16px;width:110px;height:110px;z-index:6;touch-action:none}
@@ -59,7 +74,50 @@ button:active{transform:scale(.97)}
 .dialog p{font-size:.85rem;line-height:1.45}
 .dialog .acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .dialog .acts button{flex:1;min-width:80px}
-/* BATTLE sketch */
+/* Deploy panel */
+.deploy{position:absolute;inset:0;background:rgba(0,0,0,.82);z-index:12;display:none;flex-direction:column;padding:16px 12px;overflow-y:auto;touch-action:pan-y}
+.deploy.show{display:flex}
+.deploy h2{color:var(--accent);text-align:center;margin-bottom:4px}
+.deploy .sub{color:var(--muted);text-align:center;font-size:.8rem;margin-bottom:12px}
+.deploy-list{display:flex;flex-direction:column;gap:8px;max-width:400px;margin:0 auto;width:100%}
+.deploy-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--border);border-radius:12px;padding:8px 10px;cursor:pointer}
+.deploy-row.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.deploy-row.faint{opacity:.45}
+.deploy-row canvas{flex-shrink:0}
+.deploy-row .info{flex:1;min-width:0}
+.deploy-row .dn{font-weight:700}
+.deploy-row .dmeta{font-size:.72rem;color:var(--muted)}
+.deploy-row .ord-badge{width:28px;height:28px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted)}
+.deploy-row.on .ord-badge{background:var(--accent);color:#052e16;border-color:var(--accent)}
+.deploy-acts{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+/* DEX cream panel */
+#dex{background:var(--cream);color:var(--ink);touch-action:pan-y;overflow-y:auto}
+.dex-top{position:sticky;top:0;z-index:5;background:rgba(255,250,240,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--cline);padding:10px 12px}
+.dex-top h2{font-size:1.2rem;font-weight:800}
+.dex-top .hint{font-size:.75rem;color:var(--inkm);margin-top:2px}
+.dex-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;align-items:center}
+.dex-chips .lab{font-size:.7rem;color:var(--inkm);font-weight:700;margin-right:2px}
+.dchip{border:1.5px solid var(--cline);background:#fff;color:var(--ink);padding:4px 10px;border-radius:999px;font-size:.72rem;cursor:pointer;user-select:none}
+.dchip.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+.dex-tabs{display:flex;gap:4px;margin-top:8px}
+.dtab{background:none;border:0;color:var(--inkm);padding:6px 12px;font-size:.85rem;font-weight:800;cursor:pointer;border-bottom:3px solid transparent;border-radius:8px 8px 0 0}
+.dtab.on{color:var(--ink);border-color:#ffd23f;background:#fff}
+.dex-body{padding:12px;padding-bottom:80px}
+.dex-info{font-size:.75rem;color:var(--inkm);margin-bottom:10px}
+.dex-group{margin-bottom:18px}
+.dex-group h3{font-size:.95rem;background:var(--cream2);border:1px solid #f3e0a8;border-left:6px solid #ffd23f;border-radius:10px;padding:6px 10px;margin-bottom:8px;color:var(--ink)}
+.dex-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dcard{background:#fff;border:1px solid var(--cline);border-radius:14px;padding:10px;text-align:center;box-shadow:0 2px 8px rgba(31,42,68,.06)}
+.dcard canvas{display:block;margin:0 auto 4px}
+.dcard .nm{font-weight:800;font-size:.9rem;color:var(--ink)}
+.dcard .meta{font-size:.68rem;color:var(--inkm);margin:2px 0}
+.dcard .lin{font-size:.65rem;background:var(--cream2);border:1px solid #f3e0a8;border-radius:8px;padding:3px 6px;margin-top:4px;color:#3f4a63;line-height:1.3}
+.dcard .stg{font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px}
+.stg0{background:var(--s0s);color:var(--s0)}.stg1{background:var(--s1s);color:var(--s1)}.stg2{background:var(--s2s);color:var(--s2)}
+.dex-bar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--cream) 35%);padding:12px;display:flex;justify-content:center;gap:8px}
+.dex-bar .btn{box-shadow:0 4px 0 #15803d}
+.dex-bar .btn-sec{background:#fff;color:var(--ink);border:1px solid var(--cline);box-shadow:0 3px 0 #c5cdd8}
+/* BATTLE */
 #battle{background:#1c2830;position:relative}
 #battleCanvas{display:block;width:100%;height:100%;touch-action:none}
 .b-top{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:12px;z-index:5;pointer-events:none}
@@ -75,6 +133,11 @@ button:active{transform:scale(.97)}
 .b-card.pl .bhp-label{flex-direction:row-reverse}
 .b-card .bhp-bar{height:12px;background:#ddd;border-radius:6px;overflow:hidden;border:1px solid #999;margin-top:2px}
 .b-card .bhp-fill{height:100%;background:linear-gradient(180deg,#6ee7a8,#22c55e);width:100%}
+.b-bench{position:absolute;top:78px;left:10px;right:10px;display:flex;justify-content:space-between;z-index:5;pointer-events:none;gap:8px}
+.b-bench .side{display:flex;gap:4px;flex-wrap:wrap;max-width:48%}
+.b-bench .side.r{justify-content:flex-end}
+.b-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;border:1px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.b-dot.faint{background:#64748b}.b-dot.active{box-shadow:0 0 0 2px #fbbf24}
 .b-pad{position:absolute;bottom:18px;left:14px;width:130px;height:130px;z-index:6;touch-action:none}
 .b-pad-base{width:100%;height:100%;border-radius:50%;background:rgba(255,255,255,.12);border:3px solid rgba(255,255,255,.35);position:relative}
 .b-pad-base::before,.b-pad-base::after{content:"";position:absolute;background:rgba(255,255,255,.15)}
@@ -82,17 +145,19 @@ button:active{transform:scale(.97)}
 .b-pad-base::after{height:3px;width:70%;top:50%;left:15%;transform:translateY(-50%)}
 .b-pad-knob{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.45);border:2px solid rgba(255,255,255,.7);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
 .b-pad-label{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:.65rem;color:rgba(255,255,255,.7)}
-.b-actions{position:absolute;bottom:22px;right:16px;display:flex;flex-direction:column;gap:12px;align-items:center;z-index:6}
+.b-actions{position:absolute;bottom:22px;right:16px;display:flex;flex-direction:column;gap:10px;align-items:center;z-index:6}
 .cd-btn{width:72px;height:72px;border-radius:50%;position:relative;border:3px solid #334155;box-shadow:0 4px 0 #1e293b,0 6px 16px rgba(0,0,0,.4);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
 .cd-btn.atk{background:radial-gradient(circle at 35% 30%,#fecaca,#ef4444);border-color:#991b1b;box-shadow:0 4px 0 #7f1d1d,0 6px 16px rgba(0,0,0,.4)}
 .cd-btn.skl{background:radial-gradient(circle at 35% 30%,#fde68a,#f59e0b);border-color:#92400e;box-shadow:0 4px 0 #78350f,0 6px 16px rgba(0,0,0,.4)}
+.cd-btn.sw{width:56px;height:56px;background:radial-gradient(circle at 35% 30%,#c4b5fd,#7c3aed);border-color:#5b21b6;box-shadow:0 3px 0 #4c1d95,0 4px 12px rgba(0,0,0,.4)}
 .cd-btn .icon{font-size:1.35rem;line-height:1}
+.cd-btn.sw .icon{font-size:1.1rem}
 .cd-btn .lbl{font-size:.62rem;font-weight:700;margin-top:2px}
 .cd-btn .cd-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .cd-btn.cooling{filter:grayscale(.7);opacity:.8}
 .cd-btn .cd-num{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.45);border-radius:50%;pointer-events:none}
 .cd-btn .cd-num.on{display:flex}
-.b-act-hint{font-size:.6rem;color:rgba(255,255,255,.65);text-align:center;margin-top:-6px}
+.b-act-hint{font-size:.6rem;color:rgba(255,255,255,.65);text-align:center;margin-top:-4px}
 .b-toast{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);font-size:1.1rem;font-weight:700;color:#fff;text-shadow:0 2px 8px #000;pointer-events:none;z-index:7;opacity:0;transition:opacity .2s}
 .b-toast.show{opacity:1}
 .b-result{position:absolute;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:10;text-align:center;padding:24px}
@@ -100,13 +165,22 @@ button:active{transform:scale(.97)}
 .b-result h2{font-size:2.2rem;margin-bottom:8px}
 .b-result.win h2{color:var(--accent)}.b-result.lose h2{color:var(--danger)}
 .b-result .acts{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;justify-content:center}
-.type-火{background:#f87171;color:#450a0a}.type-水{background:#60a5fa;color:#1e3a5f}
-.type-草{background:#4ade80;color:#14532d}.type-電{background:#fbbf24;color:#451a03}
-.type-岩{background:#a8a29e;color:#1c1917}.type-飛{background:#a5b4fc;color:#1e1b4b}
-@media(min-width:481px){#app:not(.battle-mode){border-left:1px solid var(--border);border-right:1px solid var(--border)}}
+.switch-panel{position:absolute;inset:0;background:rgba(0,0,0,.85);z-index:11;display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px;touch-action:pan-y;overflow-y:auto}
+.switch-panel.show{display:flex}
+.switch-panel h3{color:var(--accent);margin-bottom:10px}
+.type-一般{background:#a8a29e;color:#1c1917}.type-火{background:#f87171;color:#450a0a}
+.type-水{background:#60a5fa;color:#1e3a5f}.type-草{background:#4ade80;color:#14532d}
+.type-電{background:#fbbf24;color:#451a03}.type-冰{background:#a5f3fc;color:#164e63}
+.type-格鬥{background:#c2410c;color:#fff7ed}.type-毒{background:#c084fc;color:#3b0764}
+.type-地面{background:#d6a56a;color:#451a03}.type-飛行{background:#a5b4fc;color:#1e1b4b}
+.type-超能力{background:#f0abfc;color:#701a75}.type-蟲{background:#a3e635;color:#365314}
+.type-岩石{background:#a8a29e;color:#1c1917}.type-幽靈{background:#818cf8;color:#1e1b4b}
+.type-龍{background:#6366f1;color:#eef2ff}.type-惡{background:#57534e;color:#fafaf9}
+.type-鋼{background:#94a3b8;color:#0f172a}.type-妖精{background:#f9a8d4;color:#831843}
+@media(min-width:481px){#app:not(.battle-mode):not(.dex-mode){border-left:1px solid var(--border);border-right:1px solid var(--border)}}
 @media(orientation:landscape) and (max-height:500px){
   .b-pad{width:110px;height:110px;bottom:10px;left:10px}
-  .cd-btn{width:62px;height:62px}
+  .cd-btn{width:62px;height:62px}.cd-btn.sw{width:48px;height:48px}
   .b-card{padding:6px 10px;min-width:120px}
 }
 </style>
@@ -116,28 +190,66 @@ button:active{transform:scale(.97)}
   <div id="title" class="screen active">
     <canvas class="title-art" id="titleArt" width="120" height="120"></canvas>
     <div class="logo">靈獸樂園</div>
-    <div class="subtitle">選夥伴 · 逛樂園 · 即時對戰</div>
-    <p class="disclaimer">原創靈獸遊戲，與任天堂／寶可夢官方無關</p>
+    <div class="subtitle">組隊伍 · 逛樂園 · 即時對戰</div>
+    <p class="disclaimer">原創靈獸遊戲，與任天堂／寶可夢官方無關。靈感僅來自粉絲圖鑑的「譜系／屬性瀏覽」體驗，不含任何官方名稱、圖像或招式。</p>
     <button class="btn" id="btnStart">開始冒險</button>
+    <div class="btn-row"><button class="btn btn-sm btn-sec" id="btnDexTitle">靈獸圖鑑</button></div>
   </div>
   <div id="pick" class="screen">
-    <div class="pick-head"><h2>選擇夥伴</h2><p>挑選一隻喜歡的靈獸同行</p></div>
+    <div class="pick-head">
+      <h2>組建隊伍</h2>
+      <p>挑選 1～3 隻<strong>基礎型</strong>靈獸（點選順序＝出戰順序）</p>
+      <div class="party-slots" id="partySlots"></div>
+    </div>
     <div class="roster" id="roster"></div>
-    <div class="pick-bar"><button class="btn btn-sm" id="btnConfirmPick" disabled>確認選擇</button></div>
+    <div class="pick-bar">
+      <button class="btn btn-sm btn-sec" id="btnPickClear">清空</button>
+      <button class="btn btn-sm" id="btnConfirmPick" disabled>確認隊伍</button>
+    </div>
+  </div>
+  <div id="dex" class="screen">
+    <div class="dex-top">
+      <h2>靈獸圖鑑</h2>
+      <div class="hint">原創靈獸 · 依屬性篩選 · 譜系以「→」串起</div>
+      <div class="dex-tabs">
+        <button class="dtab on" data-tab="all">全部</button>
+        <button class="dtab" data-tab="line">譜系</button>
+        <button class="dtab" data-tab="stage">進化程度</button>
+      </div>
+      <div class="dex-chips" id="dexTypeChips"></div>
+    </div>
+    <div class="dex-body">
+      <div class="dex-info" id="dexInfo"></div>
+      <div id="dexList"></div>
+    </div>
+    <div class="dex-bar"><button class="btn btn-sm btn-sec" id="btnDexBack">返回</button></div>
   </div>
   <div id="map" class="screen">
     <canvas id="mapCanvas"></canvas>
     <div class="hud">
       <div>
-        <div class="hud-chip"><span class="pet-name" id="hudPet">—</span> · Lv.20</div>
+        <div class="hud-chip"><div class="hud-party" id="hudParty">—</div></div>
         <div class="hud-chip buff" id="hudBuff" style="display:none"></div>
       </div>
-      <div class="hud-chip">WASD／方向鍵移動</div>
+      <div class="hud-chip">WASD／方向鍵</div>
     </div>
     <div class="zone-tag" id="zoneTag">入口廣場</div>
     <div class="dialog" id="dialog"><h3 id="dlgTitle"></h3><p id="dlgBody"></p><div class="acts" id="dlgActs"></div></div>
+    <div class="deploy" id="deploy">
+      <h2>出戰選配</h2>
+      <div class="sub">點選 1～3 隻出戰（順序＝戰鬥順位），確認後開戰</div>
+      <div class="deploy-list" id="deployList"></div>
+      <div class="deploy-acts">
+        <button class="btn btn-sm btn-sec" id="btnDeployCancel">取消</button>
+        <button class="btn btn-sm" id="btnDeployGo" disabled>確認出戰</button>
+      </div>
+    </div>
     <div class="stick-wrap" id="stickWrap"><div class="stick-base"><div class="stick-knob" id="stickKnob"></div></div></div>
-    <div class="map-btns"><button id="btnInteract">互動 ✦</button><button id="btnMenu">選單</button></div>
+    <div class="map-btns">
+      <button id="btnInteract">互動 ✦</button>
+      <button id="btnDexMap">圖鑑</button>
+      <button id="btnMenu">選單</button>
+    </div>
   </div>
   <div id="battle" class="screen">
     <canvas id="battleCanvas"></canvas>
@@ -155,6 +267,7 @@ button:active{transform:scale(.97)}
         <div class="bhp-bar"><div class="bhp-fill" id="plHp"></div></div>
       </div>
     </div>
+    <div class="b-bench"><div class="side" id="plDots"></div><div class="side r" id="enDots"></div></div>
     <div class="b-toast" id="bToast"></div>
     <div class="b-pad" id="bPad">
       <div class="b-pad-base"><div class="b-pad-knob" id="bPadKnob"></div></div>
@@ -173,6 +286,14 @@ button:active{transform:scale(.97)}
         <span class="cd-num" id="sklCd"></span>
       </button>
       <div class="b-act-hint">冷卻 10 秒</div>
+      <button class="cd-btn sw" id="btnSwitch" type="button" title="換手">
+        <span class="icon">⇄</span><span class="lbl">換手</span>
+      </button>
+    </div>
+    <div class="switch-panel" id="switchPanel">
+      <h3>選擇換上的靈獸</h3>
+      <div class="deploy-list" id="switchList"></div>
+      <div class="deploy-acts"><button class="btn btn-sm btn-sec" id="btnSwitchCancel">取消</button></div>
     </div>
     <div class="b-result" id="bResult">
       <h2 id="bResTitle"></h2>
@@ -185,39 +306,113 @@ button:active{transform:scale(.97)}
   </div>
 </div>
 <script>
-
 (() => {
 'use strict';
-const EFF={火:{草:1.5,水:0.67,岩:0.67},水:{火:1.5,草:0.67,岩:1.5},草:{水:1.5,火:0.67,飛:0.67},電:{水:1.5,岩:0.67,飛:1.5},岩:{飛:1.5,火:1.5},飛:{草:1.5,電:0.67,岩:0.67}};
+const TYPES=['一般','火','水','草','電','冰','格鬥','毒','地面','飛行','超能力','蟲','岩石','幽靈','龍','惡','鋼','妖精'];
+const STAGE_N=['基礎型','一階進化','二階進化'];
+const EFF={
+  一般:{岩石:0.67,幽靈:0.5,鋼:0.67},
+  火:{草:1.5,冰:1.5,蟲:1.5,鋼:1.5,水:0.67,岩石:0.67,龍:0.67},
+  水:{火:1.5,地面:1.5,岩石:1.5,草:0.67,龍:0.67},
+  草:{水:1.5,地面:1.5,岩石:1.5,火:0.67,飛行:0.67,蟲:0.67,龍:0.67,鋼:0.67,毒:0.67},
+  電:{水:1.5,飛行:1.5,地面:0.5,草:0.67,龍:0.67},
+  冰:{草:1.5,地面:1.5,飛行:1.5,龍:1.5,火:0.67,水:0.67,鋼:0.67},
+  格鬥:{一般:1.5,冰:1.5,岩石:1.5,惡:1.5,鋼:1.5,飛行:0.67,毒:0.67,超能力:0.67,蟲:0.67,妖精:0.67,幽靈:0.5},
+  毒:{草:1.5,妖精:1.5,毒:0.67,地面:0.67,岩石:0.67,幽靈:0.67,鋼:0.5},
+  地面:{火:1.5,電:1.5,毒:1.5,岩石:1.5,鋼:1.5,草:0.67,蟲:0.67,飛行:0.5},
+  飛行:{草:1.5,格鬥:1.5,蟲:1.5,電:0.67,岩石:0.67,鋼:0.67},
+  超能力:{格鬥:1.5,毒:1.5,鋼:0.67,惡:0.5},
+  蟲:{草:1.5,超能力:1.5,惡:1.5,火:0.67,格鬥:0.67,飛行:0.67,幽靈:0.67,鋼:0.67,妖精:0.67,毒:0.67},
+  岩石:{火:1.5,冰:1.5,飛行:1.5,蟲:1.5,格鬥:0.67,地面:0.67,鋼:0.67},
+  幽靈:{幽靈:1.5,超能力:1.5,一般:0.5,惡:0.67},
+  龍:{龍:1.5,鋼:0.67,妖精:0.5},
+  惡:{超能力:1.5,幽靈:1.5,格鬥:0.67,惡:0.67,妖精:0.67},
+  鋼:{冰:1.5,岩石:1.5,妖精:1.5,火:0.67,水:0.67,電:0.67,鋼:0.67},
+  妖精:{格鬥:1.5,龍:1.5,惡:1.5,火:0.67,毒:0.67,鋼:0.67}
+};
 function typeMul(a,d){return (EFF[a]&&EFF[a][d])||1;}
+
 const MOVES={
+  tackle:{n:'衝撞',t:'一般',p:40},bite:{n:'咬住',t:'一般',p:50},
   spark:{n:'火花彈',t:'火',p:40},blaze:{n:'烈焰衝',t:'火',p:55},
   splash:{n:'水花濺',t:'水',p:40},tide:{n:'潮汐擊',t:'水',p:55},
   leaf:{n:'葉刃',t:'草',p:40},vine:{n:'藤鞭纏',t:'草',p:50},
   zap:{n:'電光閃',t:'電',p:45},thunder:{n:'雷鳴擊',t:'電',p:55},
-  rock:{n:'落石',t:'岩',p:45},quake:{n:'岩崩',t:'岩',p:55},
-  gust:{n:'疾風翼',t:'飛',p:40},dive:{n:'俯衝爪',t:'飛',p:55}
+  rock:{n:'落石',t:'岩石',p:45},quake:{n:'岩崩',t:'岩石',p:55},
+  gust:{n:'疾風翼',t:'飛行',p:40},dive:{n:'俯衝爪',t:'飛行',p:55},
+  frost:{n:'霜晶彈',t:'冰',p:40},blizzard:{n:'冰嵐',t:'冰',p:55},
+  poison:{n:'毒針',t:'毒',p:40},toxic:{n:'毒霧波',t:'毒',p:55},
+  bugbite:{n:'蟲咬',t:'蟲',p:40},swarm:{n:'蟲群舞',t:'蟲',p:52},
+  dig:{n:'掘沙',t:'地面',p:42},tremor:{n:'地裂',t:'地面',p:55},
+  metal:{n:'鐵彈',t:'鋼',p:42},iron:{n:'鋼甲撞',t:'鋼',p:55},
+  shade:{n:'幽影球',t:'幽靈',p:42},haunt:{n:'鬼火襲',t:'幽靈',p:55},
+  draco:{n:'龍息',t:'龍',p:45},outrage:{n:'逆鱗衝',t:'龍',p:58},
+  charm:{n:'星粉擊',t:'妖精',p:40},moon:{n:'月露光',t:'妖精',p:55},
+  punch:{n:'正拳',t:'格鬥',p:45},kick:{n:'迴旋踢',t:'格鬥',p:55},
+  snarl:{n:'暗嚎',t:'惡',p:42},foul:{n:'暗襲爪',t:'惡',p:55},
+  psy:{n:'念力彈',t:'超能力',p:42},psychic:{n:'幻覺波',t:'超能力',p:55}
 };
+
+/* 36 creatures, 18 lineages × 2 stages. Original names only. */
 const CREATURES=[
-  {id:'flame_bunny',n:'焰絨兔',t:'火',flavor:'耳尖燃著小火苗的絨毛靈獸，個性活潑。',hp:72,atk:58,def:42,spd:65,moves:['spark','blaze'],pal:['#ff8a65','#fff3e0','#e53935']},
-  {id:'bubble_porpoise',n:'潮泡豚',t:'水',flavor:'吹出彩虹泡泡的小海豚，最愛戲水。',hp:78,atk:50,def:52,spd:55,moves:['splash','tide'],pal:['#4fc3f7','#e1f5fe','#0277bd']},
-  {id:'sprout_fox',n:'翠芽狐',t:'草',flavor:'尾巴長出新芽的靈狐，聞得到泥土香。',hp:70,atk:55,def:48,spd:62,moves:['leaf','vine'],pal:['#81c784','#fffde7','#2e7d32']},
-  {id:'flash_orb',n:'閃電球',t:'電',flavor:'滾動時會劈啪放電的圓滾靈獸。',hp:65,atk:62,def:40,spd:70,moves:['zap','thunder'],pal:['#ffd54f','#fff8e1','#f9a825']},
-  {id:'stone_ram',n:'磐角羊',t:'岩',flavor:'角如峭壁的堅韌靈羊，站立如山。',hp:85,atk:60,def:70,spd:35,moves:['rock','quake'],pal:['#bcaaa4','#efebe9','#6d4c41']},
-  {id:'wind_swallow',n:'風羽燕',t:'飛',flavor:'乘氣流滑翔的靈燕，叫聲清亮。',hp:62,atk:56,def:38,spd:78,moves:['gust','dive'],pal:['#90caf9','#e3f2fd','#5c6bc0']},
-  {id:'lava_lizard',n:'熔岩蜥',t:'火',flavor:'背脊流淌岩漿紋路的靈蜥。',hp:68,atk:64,def:45,spd:50,moves:['spark','blaze'],pal:['#ef5350','#ffccbc','#bf360c']},
-  {id:'coral_crab',n:'珊瑚蟹',t:'水',flavor:'鉗上長滿珊瑚花的護礁靈蟹。',hp:74,atk:54,def:62,spd:40,moves:['splash','tide'],pal:['#f48fb1','#fce4ec','#ad1457']},
-  {id:'thorn_hedge',n:'荊棘猬',t:'草',flavor:'刺上開滿小花的防禦型靈猬。',hp:80,atk:48,def:68,spd:38,moves:['leaf','vine'],pal:['#aed581','#f1f8e9','#558b2f']}
+  {id:'flame_bunny',n:'焰絨兔',t:'火',stage:0,line:'flame',flavor:'耳尖燃著小火苗的絨毛靈獸，個性活潑。',hp:72,atk:58,def:42,spd:65,moves:['spark','blaze'],pal:['#ff8a65','#fff3e0','#e53935']},
+  {id:'blaze_hare',n:'焰鬃兔',t:'火',stage:1,line:'flame',flavor:'鬃毛如火簾，奔跑時留下灼熱軌跡。',hp:88,atk:72,def:52,spd:78,moves:['spark','blaze'],pal:['#ef5350','#ffccbc','#b71c1c']},
+  {id:'bubble_porpoise',n:'潮泡豚',t:'水',stage:0,line:'tide',flavor:'吹出彩虹泡泡的小海豚，最愛戲水。',hp:78,atk:50,def:52,spd:55,moves:['splash','tide'],pal:['#4fc3f7','#e1f5fe','#0277bd']},
+  {id:'tide_song',n:'潮歌豚',t:'水',stage:1,line:'tide',flavor:'歌聲能捲起浪花，護著同行夥伴。',hp:95,atk:62,def:64,spd:68,moves:['splash','tide'],pal:['#29b6f6','#b3e5fc','#01579b']},
+  {id:'sprout_fox',n:'翠芽狐',t:'草',stage:0,line:'sprout',flavor:'尾巴長出新芽的靈狐，聞得到泥土香。',hp:70,atk:55,def:48,spd:62,moves:['leaf','vine'],pal:['#81c784','#fffde7','#2e7d32']},
+  {id:'leaf_fox',n:'翠葉狐',t:'草',stage:1,line:'sprout',flavor:'尾葉舒展成冠，能淨化周圍空氣。',hp:86,atk:68,def:60,spd:74,moves:['leaf','vine'],pal:['#66bb6a','#f1f8e9','#1b5e20']},
+  {id:'flash_orb',n:'閃電球',t:'電',stage:0,line:'flash',flavor:'滾動時會劈啪放電的圓滾靈獸。',hp:65,atk:62,def:40,spd:70,moves:['zap','thunder'],pal:['#ffd54f','#fff8e1','#f9a825']},
+  {id:'thunder_orb',n:'雷滾球',t:'電',stage:1,line:'flash',flavor:'體內積蓄雷雲，彈跳時落下細雷。',hp:80,atk:78,def:50,spd:86,moves:['zap','thunder'],pal:['#ffca28','#fffde7','#f57f17']},
+  {id:'stone_ram',n:'磐角羊',t:'岩石',stage:0,line:'stone',flavor:'角如峭壁的堅韌靈羊，站立如山。',hp:85,atk:60,def:70,spd:35,moves:['rock','quake'],pal:['#bcaaa4','#efebe9','#6d4c41']},
+  {id:'cliff_ram',n:'峭壁羊',t:'岩石',stage:1,line:'stone',flavor:'雙角嶙峋如斷崖，防守滴水不漏。',hp:104,atk:74,def:88,spd:42,moves:['rock','quake'],pal:['#a1887f','#d7ccc8','#4e342e']},
+  {id:'wind_swallow',n:'風羽燕',t:'飛行',stage:0,line:'wind',flavor:'乘氣流滑翔的靈燕，叫聲清亮。',hp:62,atk:56,def:38,spd:78,moves:['gust','dive'],pal:['#90caf9','#e3f2fd','#5c6bc0']},
+  {id:'gale_swallow',n:'嵐翼燕',t:'飛行',stage:1,line:'wind',flavor:'雙翼捲起微嵐，瞬間可切換高度。',hp:76,atk:70,def:48,spd:96,moves:['gust','dive'],pal:['#64b5f6','#bbdefb','#3949ab']},
+  {id:'frost_mink',n:'霜晶貂',t:'冰',stage:0,line:'frost',flavor:'毛皮覆著細霜，足跡會結薄冰。',hp:68,atk:58,def:48,spd:66,moves:['frost','blizzard'],pal:['#80deea','#e0f7fa','#00838f']},
+  {id:'aurora_mink',n:'極光貂',t:'冰',stage:1,line:'frost',flavor:'奔跑時身後曳出極光色絲帶。',hp:84,atk:72,def:60,spd:82,moves:['frost','blizzard'],pal:['#4dd0e1','#b2ebf2','#006064']},
+  {id:'venom_snake',n:'毒刺蛇',t:'毒',stage:0,line:'venom',flavor:'尾尖滴著螢光毒液，警惕心強。',hp:66,atk:60,def:44,spd:68,moves:['poison','toxic'],pal:['#ce93d8','#f3e5f5','#6a1b9a']},
+  {id:'toxic_python',n:'劇毒蟒',t:'毒',stage:1,line:'venom',flavor:'盤繞時釋出紫霧，令對手步伐紊亂。',hp:90,atk:76,def:58,spd:72,moves:['poison','toxic'],pal:['#ab47bc','#e1bee7','#4a148c']},
+  {id:'glow_grub',n:'螢芽蟲',t:'蟲',stage:0,line:'glow',flavor:'腹部微光的幼蟲，夜晚在草叢閃爍。',hp:60,atk:52,def:46,spd:50,moves:['bugbite','swarm'],pal:['#c5e1a5','#f1f8e9','#558b2f']},
+  {id:'glow_moth',n:'螢光蛾',t:'蟲',stage:1,line:'glow',flavor:'翅粉會短暫發光，迷惑追趕者。',hp:74,atk:64,def:54,spd:80,moves:['bugbite','swarm'],pal:['#aed581','#dcedc8','#33691e']},
+  {id:'sand_pig',n:'沙滾豚',t:'地面',stage:0,line:'sand',flavor:'喜歡把身體滾成沙球躲起來。',hp:80,atk:54,def:60,spd:40,moves:['dig','tremor'],pal:['#d7ccc8','#efebe9','#795548']},
+  {id:'armor_pig',n:'砂鎧豚',t:'地面',stage:1,line:'sand',flavor:'背甲覆滿硬化砂層，衝撞力十足。',hp:102,atk:70,def:82,spd:48,moves:['dig','tremor'],pal:['#bcaaa4','#d7ccc8','#5d4037']},
+  {id:'iron_mouse',n:'鐵芽鼠',t:'鋼',stage:0,line:'iron',flavor:'門牙閃著金屬光澤的好奇靈鼠。',hp:70,atk:58,def:72,spd:48,moves:['metal','iron'],pal:['#b0bec5','#eceff1','#546e7a']},
+  {id:'steel_mouse',n:'鋼甲鼠',t:'鋼',stage:1,line:'iron',flavor:'全身甲片咬合，幾乎無懈可擊。',hp:88,atk:72,def:96,spd:55,moves:['metal','iron'],pal:['#90a4ae','#cfd8dc','#37474f']},
+  {id:'soul_candle',n:'幽燭',t:'幽靈',stage:0,line:'soul',flavor:'火焰是它的身體，風吹不熄。',hp:58,atk:64,def:40,spd:62,moves:['shade','haunt'],pal:['#b39ddb','#ede7f6','#4527a0']},
+  {id:'ghost_lantern',n:'鬼焰燈',t:'幽靈',stage:1,line:'soul',flavor:'提燈內困著幽火，靜夜會低語。',hp:72,atk:82,def:52,spd:76,moves:['shade','haunt'],pal:['#7e57c2','#d1c4e9','#311b92']},
+  {id:'baby_drake',n:'稚龍崽',t:'龍',stage:0,line:'drake',flavor:'角還沒長齊的小龍，夢想飛上雲端。',hp:74,atk:62,def:50,spd:58,moves:['draco','outrage'],pal:['#7986cb','#e8eaf6','#303f9f']},
+  {id:'storm_drake',n:'嵐鱗龍',t:'龍',stage:1,line:'drake',flavor:'鱗片映著雷雲，振翅可掀起小嵐。',hp:96,atk:84,def:68,spd:72,moves:['draco','outrage'],pal:['#5c6bc0','#c5cae9','#1a237e']},
+  {id:'star_powder',n:'星粉兔',t:'妖精',stage:0,line:'star',flavor:'抖動身體會灑下閃閃星粉。',hp:70,atk:52,def:50,spd:64,moves:['charm','moon'],pal:['#f8bbd0','#fce4ec','#ad1457']},
+  {id:'moon_dew',n:'月露兔',t:'妖精',stage:1,line:'star',flavor:'月夜時角尖凝結露珠，癒合力強。',hp:88,atk:66,def:64,spd:78,moves:['charm','moon'],pal:['#f48fb1','#f8bbd0','#880e4f']},
+  {id:'punch_tanuki',n:'拳拳狸',t:'格鬥',stage:0,line:'punch',flavor:'前掌厚實，最愛對石頭練拳。',hp:76,atk:68,def:50,spd:52,moves:['punch','kick'],pal:['#ffab91','#fbe9e7','#bf360c']},
+  {id:'mega_fist',n:'霸拳狸',t:'格鬥',stage:1,line:'punch',flavor:'一記迴旋踢能震落樹上果實。',hp:94,atk:88,def:64,spd:64,moves:['punch','kick'],pal:['#ff8a65','#ffccbc','#d84315']},
+  {id:'shadow_kit',n:'影狐仔',t:'惡',stage:0,line:'shade',flavor:'喜歡躲在陰影裡捉弄過路人。',hp:64,atk:60,def:42,spd:72,moves:['snarl','foul'],pal:['#78909c','#eceff1','#263238']},
+  {id:'night_howl',n:'夜嚎狐',t:'惡',stage:1,line:'shade',flavor:'夜半長嚎，令對手心神不寧。',hp:80,atk:78,def:54,spd:90,moves:['snarl','foul'],pal:['#546e7a','#cfd8dc','#102027']},
+  {id:'mind_shroom',n:'念念菇',t:'超能力',stage:0,line:'mind',flavor:'菌傘會微微顫動，彷彿在思考。',hp:68,atk:55,def:48,spd:58,moves:['psy','psychic'],pal:['#ea80fc','#f3e5f5','#6a1b9a']},
+  {id:'illusion_shroom',n:'幻覺菇',t:'超能力',stage:1,line:'mind',flavor:'能投射幻象，迷惑靠近者的感官。',hp:84,atk:72,def:60,spd:70,moves:['psy','psychic'],pal:['#e040fb','#e1bee7','#4a148c']},
+  {id:'fluff_pup',n:'團團犬',t:'一般',stage:0,line:'fluff',flavor:'圓滾滾的忠誠靈犬，尾巴比身體還忙。',hp:75,atk:55,def:50,spd:60,moves:['tackle','bite'],pal:['#ffe082','#fff8e1','#f9a825']},
+  {id:'guard_hound',n:'守護犬',t:'一般',stage:1,line:'fluff',flavor:'守護同伴時會發出響亮吠聲。',hp:98,atk:72,def:68,spd:70,moves:['tackle','bite'],pal:['#ffd54f','#ffecb3','#ff8f00']}
 ];
+
+const LINE_ORDER=['flame','tide','sprout','flash','stone','wind','frost','venom','glow','sand','iron','soul','drake','star','punch','shade','mind','fluff'];
+function byId(id){return CREATURES.find(c=>c.id===id);}
+function lineCreatures(line){return CREATURES.filter(c=>c.line===line).sort((a,b)=>a.stage-b.stage);}
+function lineageLabel(line){return lineCreatures(line).map(c=>c.n).join('→');}
+function bases(){return CREATURES.filter(c=>c.stage===0);}
+
 const NPCS=[
   {id:'guide',n:'園區導覽員',x:10,y:14,color:'#fbbf24',talk:'welcome'},
   {id:'healer',n:'休息亭護士',x:8,y:8,color:'#f472b6',talk:'heal'},
   {id:'center',n:'夥伴中心',x:12,y:8,color:'#a78bfa',talk:'center'},
-  {id:'ch1',n:'挑戰者·阿焰',x:6,y:5,color:'#f87171',talk:'battle',foe:'lava_lizard'},
-  {id:'ch2',n:'挑戰者·小潮',x:18,y:6,color:'#60a5fa',talk:'battle',foe:'coral_crab'},
-  {id:'ch3',n:'挑戰者·翠翠',x:20,y:16,color:'#4ade80',talk:'battle',foe:'thorn_hedge'},
+  {id:'ch1',n:'挑戰者·阿焰',x:6,y:5,color:'#f87171',talk:'battle',foes:['blaze_hare']},
+  {id:'ch2',n:'挑戰者·小潮',x:18,y:6,color:'#60a5fa',talk:'battle',foes:['tide_song']},
+  {id:'ch3',n:'挑戰者·翠翠',x:20,y:16,color:'#4ade80',talk:'battle',foes:['leaf_fox']},
+  {id:'ch4',n:'挑戰者·雷雷',x:4,y:16,color:'#fbbf24',talk:'battle',foes:['thunder_orb']},
+  {id:'ch5',n:'挑戰者·霜霜',x:22,y:12,color:'#67e8f9',talk:'battle',foes:['aurora_mink']},
+  {id:'ch6',n:'挑戰者·影行',x:7,y:20,color:'#94a3b8',talk:'battle',foes:['night_howl','shadow_kit']},
   {id:'arena',n:'競技場裁判',x:15,y:20,color:'#e2e8f0',talk:'arena'}
 ];
+const ARENA_POOL=['cliff_ram','gale_swallow','toxic_python','glow_moth','armor_pig','steel_mouse','ghost_lantern','storm_drake','moon_dew','mega_fist','illusion_shroom','guard_hound'];
+
 const TW=28,TH=26,TS=32;
 function zoneAt(tx,ty){
   if(ty>=18&&tx>=11&&tx<=19)return{id:'arena',n:'對戰競技場',buff:null};
@@ -246,13 +441,29 @@ function genMap(){
 const MAP=genMap();
 function walkable(tx,ty){if(tx<0||ty<0||tx>=TW||ty>=TH)return false;const t=MAP[ty][tx];return t!==2&&t!==3;}
 
-const S={screen:'title',pet:null,selId:null,px:13.5,py:15.5,facing:0,keys:{},stick:{dx:0,dy:0},zoneBuff:null,petHp:null,dialogOpen:false,battle:null,fromCenter:false};
+/* State: party = [{id,hp}], pickSel = [id,...] order */
+const S={
+  screen:'title',party:[],pickSel:[],px:13.5,py:15.5,facing:0,keys:{},stick:{dx:0,dy:0},
+  zoneBuff:null,dialogOpen:false,battle:null,fromCenter:false,dexTab:'all',dexTypes:new Set(),
+  pendingFoes:null,pendingNpc:null,deploySel:[]
+};
 function show(id){
   document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id===id));
   S.screen=id;
   document.getElementById('app').classList.toggle('battle-mode',id==='battle');
-  if(id==='map'){resizeMap();drawMap();}
+  document.getElementById('app').classList.toggle('dex-mode',id==='dex');
+  if(id==='map'){resizeMap();drawMap();updateHudParty();}
   if(id==='battle')resizeBattle();
+  if(id==='dex')renderDex();
+}
+function leader(){return S.party[0]?byId(S.party[0].id):null;}
+function updateHudParty(){
+  const el=document.getElementById('hudParty');
+  if(!S.party.length){el.textContent='—';return;}
+  el.innerHTML=S.party.map(p=>{
+    const c=byId(p.id);const hp=Math.max(0,p.hp);
+    return '<span class="hud-pet"><span class="pn">'+c.n+'</span><span class="php">'+hp+'/'+c.hp+'</span></span>';
+  }).join('');
 }
 
 function drawCreature(ctx,c,w,h,opts={}){
@@ -261,49 +472,83 @@ function drawCreature(ctx,c,w,h,opts={}){
   ctx.save();ctx.translate(cx,cy);if(opts.flip)ctx.scale(-1,1);ctx.scale(sc,sc);
   ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(0,28,22,7,0,0,Math.PI*2);ctx.fill();
   const body=shape=>{ctx.fillStyle=main;ctx.strokeStyle=dark;ctx.lineWidth=2;shape();ctx.fill();ctx.stroke();};
-  if(c.id==='flame_bunny'){
+  if(c.id==='flame_bunny'||c.id==='blaze_hare'){
     ctx.fillStyle=main;ctx.beginPath();ctx.moveTo(-14,-18);ctx.lineTo(-10,-40);ctx.lineTo(-4,-16);ctx.fill();
     ctx.beginPath();ctx.moveTo(14,-18);ctx.lineTo(10,-40);ctx.lineTo(4,-16);ctx.fill();
     ctx.fillStyle='#ffab91';ctx.beginPath();ctx.moveTo(-11,-22);ctx.lineTo(-10,-36);ctx.lineTo(-7,-20);ctx.fill();
     ctx.beginPath();ctx.moveTo(11,-22);ctx.lineTo(10,-36);ctx.lineTo(7,-20);ctx.fill();
-    body(()=>{ctx.beginPath();ctx.ellipse(0,2,20,22,0,0,Math.PI*2);});
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,c.stage?22:20,c.stage?24:22,0,0,Math.PI*2);});
     ctx.fillStyle='#ff8a80';ctx.beginPath();ctx.arc(-14,4,5,0,Math.PI*2);ctx.arc(14,4,5,0,Math.PI*2);ctx.fill();
-  }else if(c.id==='lava_lizard'){
-    body(()=>{ctx.beginPath();ctx.ellipse(0,4,22,16,0,0,Math.PI*2);});
-    ctx.fillStyle=dark;for(let i=-12;i<=12;i+=8){ctx.beginPath();ctx.moveTo(i,-8);ctx.lineTo(i+3,-22);ctx.lineTo(i+6,-8);ctx.fill();}
-    ctx.fillStyle=main;ctx.beginPath();ctx.moveTo(18,8);ctx.quadraticCurveTo(36,4,40,16);ctx.quadraticCurveTo(28,14,16,12);ctx.fill();
-  }else if(c.id==='bubble_porpoise'){
-    body(()=>{ctx.beginPath();ctx.ellipse(0,2,24,16,0,0,Math.PI*2);});
+  }else if(c.id==='bubble_porpoise'||c.id==='tide_song'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,c.stage?26:24,c.stage?18:16,0,0,Math.PI*2);});
     ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(-4,-12);ctx.lineTo(0,-28);ctx.lineTo(6,-12);ctx.fill();
     ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(20,4,10,7,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(28,-10,4,0,Math.PI*2);ctx.arc(34,-18,3,0,Math.PI*2);ctx.fill();
-  }else if(c.id==='coral_crab'){
-    body(()=>{ctx.beginPath();ctx.ellipse(0,6,22,14,0,0,Math.PI*2);});
-    ctx.fillStyle=main;ctx.beginPath();ctx.arc(-26,0,10,0,Math.PI*2);ctx.arc(26,0,10,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle=dark;ctx.lineWidth=2;ctx.beginPath();ctx.arc(-26,0,10,0,Math.PI*2);ctx.arc(26,0,10,0,Math.PI*2);ctx.stroke();
-    ctx.fillStyle='#ce93d8';ctx.fillRect(-6,-18,4,12);ctx.fillRect(2,-22,4,14);
-  }else if(c.id==='sprout_fox'){
+  }else if(c.id==='sprout_fox'||c.id==='leaf_fox'){
     ctx.fillStyle=main;ctx.beginPath();ctx.moveTo(-16,-10);ctx.lineTo(-12,-32);ctx.lineTo(-4,-14);ctx.fill();
     ctx.beginPath();ctx.moveTo(16,-10);ctx.lineTo(12,-32);ctx.lineTo(4,-14);ctx.fill();
-    body(()=>{ctx.beginPath();ctx.ellipse(0,2,18,20,0,0,Math.PI*2);});
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,c.stage?20:18,c.stage?22:20,0,0,Math.PI*2);});
     ctx.fillStyle='#66bb6a';ctx.beginPath();ctx.ellipse(-4,-26,7,4,-.5,0,Math.PI*2);ctx.ellipse(4,-28,7,4,.5,0,Math.PI*2);ctx.fill();
     ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(-22,10,12,10,0,0,Math.PI*2);ctx.fill();
-  }else if(c.id==='thorn_hedge'){
-    body(()=>{ctx.beginPath();ctx.ellipse(0,4,22,20,0,0,Math.PI*2);});
-    ctx.fillStyle=dark;for(let a=0;a<Math.PI*2;a+=Math.PI/5){const x=Math.cos(a)*20,y=Math.sin(a)*18;ctx.beginPath();ctx.moveTo(x*.6,y*.6);ctx.lineTo(x*1.3,y*1.3);ctx.lineTo(x*.6+4,y*.6);ctx.fill();}
-    ctx.fillStyle='#f48fb1';ctx.beginPath();ctx.arc(-8,-16,3,0,Math.PI*2);ctx.arc(10,-12,3,0,Math.PI*2);ctx.fill();
   }else if(c.t==='電'){
-    body(()=>{ctx.beginPath();ctx.arc(0,2,24,0,Math.PI*2);});
+    body(()=>{ctx.beginPath();ctx.arc(0,2,c.stage?26:24,0,Math.PI*2);});
     ctx.fillStyle=light;ctx.beginPath();ctx.arc(-6,-4,10,0,Math.PI*2);ctx.fill();
     ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(22,-8);ctx.lineTo(34,0);ctx.lineTo(24,2);ctx.lineTo(36,14);ctx.lineTo(18,4);ctx.lineTo(26,0);ctx.closePath();ctx.fill();
-  }else if(c.t==='岩'){
+  }else if(c.t==='岩石'){
     body(()=>{ctx.beginPath();ctx.moveTo(-18,-10);ctx.lineTo(0,-22);ctx.lineTo(20,-8);ctx.lineTo(22,14);ctx.lineTo(-4,22);ctx.lineTo(-22,10);ctx.closePath();});
     ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(-10,-18);ctx.lineTo(-18,-38);ctx.lineTo(-2,-20);ctx.fill();
     ctx.beginPath();ctx.moveTo(10,-16);ctx.lineTo(20,-36);ctx.lineTo(4,-18);ctx.fill();
-  }else if(c.t==='飛'){
+  }else if(c.t==='飛行'){
     ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(-28,0,18,10,-.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(28,0,18,10,.3,0,Math.PI*2);ctx.fill();
     body(()=>{ctx.beginPath();ctx.ellipse(0,2,16,18,0,0,Math.PI*2);});
     ctx.fillStyle='#ffb74d';ctx.beginPath();ctx.moveTo(12,2);ctx.lineTo(26,6);ctx.lineTo(12,10);ctx.closePath();ctx.fill();
+  }else if(c.t==='冰'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,20,18,0,0,Math.PI*2);});
+    ctx.fillStyle=light;ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(8,-8);ctx.lineTo(-8,-8);ctx.fill();
+    ctx.strokeStyle=dark;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-16,0);ctx.lineTo(16,8);ctx.stroke();
+  }else if(c.t==='毒'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,4,24,14,0,0,Math.PI*2);});
+    ctx.fillStyle=dark;ctx.beginPath();ctx.arc(22,0,6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#e1bee7';ctx.beginPath();ctx.arc(-8,-2,4,0,Math.PI*2);ctx.fill();
+  }else if(c.t==='蟲'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,6,18,14,0,0,Math.PI*2);});
+    if(c.stage){ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(-20,-4,14,8,-.4,0,Math.PI*2);ctx.ellipse(20,-4,14,8,.4,0,Math.PI*2);ctx.fill();}
+    else{ctx.fillStyle=dark;ctx.fillRect(-4,-16,8,10);}
+  }else if(c.t==='地面'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,6,22,16,0,0,Math.PI*2);});
+    ctx.fillStyle=dark;ctx.beginPath();ctx.ellipse(0,-4,14,8,0,0,Math.PI*2);ctx.fill();
+  }else if(c.t==='鋼'){
+    body(()=>{ctx.beginPath();ctx.moveTo(-16,-8);ctx.lineTo(0,-20);ctx.lineTo(16,-8);ctx.lineTo(18,14);ctx.lineTo(-18,14);ctx.closePath();});
+    ctx.fillStyle=light;ctx.fillRect(-6,-6,12,10);
+  }else if(c.t==='幽靈'){
+    body(()=>{ctx.beginPath();ctx.arc(0,-2,18,Math.PI,0);ctx.lineTo(18,16);ctx.lineTo(10,10);ctx.lineTo(0,18);ctx.lineTo(-10,10);ctx.lineTo(-18,16);ctx.closePath();});
+    ctx.fillStyle='#fff59d';ctx.beginPath();ctx.arc(0,-6,6,0,Math.PI*2);ctx.fill();
+  }else if(c.t==='龍'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,20,18,0,0,Math.PI*2);});
+    ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(-8,-16);ctx.lineTo(-4,-34);ctx.lineTo(2,-16);ctx.fill();
+    ctx.beginPath();ctx.moveTo(8,-16);ctx.lineTo(12,-32);ctx.lineTo(2,-14);ctx.fill();
+    ctx.fillStyle=main;ctx.beginPath();ctx.moveTo(16,8);ctx.quadraticCurveTo(34,0,38,14);ctx.quadraticCurveTo(24,12,14,10);ctx.fill();
+  }else if(c.t==='妖精'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,4,18,20,0,0,Math.PI*2);});
+    ctx.fillStyle=light;ctx.beginPath();ctx.moveTo(0,-28);ctx.lineTo(6,-16);ctx.lineTo(-6,-16);ctx.fill();
+    ctx.fillStyle='#fff';ctx.globalAlpha=.7;ctx.beginPath();ctx.arc(-20,-10,3,0,Math.PI*2);ctx.arc(22,-14,2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  }else if(c.t==='格鬥'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,18,20,0,0,Math.PI*2);});
+    ctx.fillStyle=main;ctx.beginPath();ctx.arc(-22,4,8,0,Math.PI*2);ctx.arc(22,4,8,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=dark;ctx.lineWidth=2;ctx.beginPath();ctx.arc(-22,4,8,0,Math.PI*2);ctx.arc(22,4,8,0,Math.PI*2);ctx.stroke();
+  }else if(c.t==='惡'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,2,18,20,0,0,Math.PI*2);});
+    ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(-14,-12);ctx.lineTo(-18,-28);ctx.lineTo(-6,-14);ctx.fill();
+    ctx.beginPath();ctx.moveTo(14,-12);ctx.lineTo(18,-28);ctx.lineTo(6,-14);ctx.fill();
+  }else if(c.t==='超能力'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,6,20,16,0,0,Math.PI*2);});
+    ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(0,-10,16,12,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=dark;ctx.beginPath();ctx.arc(0,-10,8,0,Math.PI*2);ctx.stroke();
+  }else if(c.t==='一般'){
+    body(()=>{ctx.beginPath();ctx.ellipse(0,4,20,18,0,0,Math.PI*2);});
+    ctx.fillStyle=main;ctx.beginPath();ctx.moveTo(-12,-14);ctx.lineTo(-16,-30);ctx.lineTo(-4,-16);ctx.fill();
+    ctx.beginPath();ctx.moveTo(12,-14);ctx.lineTo(16,-30);ctx.lineTo(4,-16);ctx.fill();
+    ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(0,10,10,8,0,0,Math.PI*2);ctx.fill();
   }else body(()=>{ctx.beginPath();ctx.ellipse(0,2,20,20,0,0,Math.PI*2);});
   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-7,-2,5,0,Math.PI*2);ctx.arc(7,-2,5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#222';ctx.beginPath();ctx.arc(-6,-2,2.5,0,Math.PI*2);ctx.arc(8,-2,2.5,0,Math.PI*2);ctx.fill();
@@ -315,33 +560,126 @@ function drawTitleArt(){
   const g=ctx.createRadialGradient(60,50,10,60,60,60);g.addColorStop(0,'#6ee7a8');g.addColorStop(1,'#1a2e24');
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(60,60,54,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle='#fbbf24';ctx.lineWidth=4;ctx.beginPath();ctx.arc(60,60,50,0,Math.PI*2);ctx.stroke();
-  drawCreature(ctx,CREATURES[2],120,120,{scale:1.1,bob:-4});
+  drawCreature(ctx,byId('sprout_fox'),120,120,{scale:1.1,bob:-4});
 }
 
+function renderPartySlots(){
+  const root=document.getElementById('partySlots');root.innerHTML='';
+  for(let i=0;i<3;i++){
+    const slot=document.createElement('div');
+    const id=S.pickSel[i];
+    if(id){
+      const c=byId(id);slot.className='party-slot filled';
+      const cv=document.createElement('canvas');cv.width=40;cv.height=40;
+      drawCreature(cv.getContext('2d'),c,40,40,{scale:0.45});
+      const ord=document.createElement('div');ord.className='ord';ord.textContent=(i+1)+'. '+c.n;
+      slot.append(cv,ord);
+    }else{slot.className='party-slot';slot.textContent='空位 '+(i+1);}
+    root.appendChild(slot);
+  }
+  document.getElementById('btnConfirmPick').disabled=S.pickSel.length===0;
+}
 function buildRoster(){
   const root=document.getElementById('roster');root.innerHTML='';
-  CREATURES.forEach(c=>{
+  S.pickSel=S.fromCenter?S.party.map(p=>p.id).slice():[];
+  bases().forEach(c=>{
     const card=document.createElement('div');card.className='card';card.dataset.id=c.id;
     const cv=document.createElement('canvas');cv.width=80;cv.height=80;
     drawCreature(cv.getContext('2d'),c,80,80,{scale:0.85});card.appendChild(cv);
     const name=document.createElement('div');name.className='name';name.textContent=c.n;
-    const type=document.createElement('span');type.className='type type-'+c.t;type.textContent=c.t+'屬性';
+    const type=document.createElement('span');type.className='type type-'+c.t;type.textContent=c.t;
+    const stg=document.createElement('span');stg.className='stage';stg.textContent=STAGE_N[c.stage];
     const fl=document.createElement('div');fl.className='flavor';fl.textContent=c.flavor;
     const st=document.createElement('div');st.className='stats';
     st.innerHTML='<span>HP <b>'+c.hp+'</b></span><span>攻擊 <b>'+c.atk+'</b></span><span>防禦 <b>'+c.def+'</b></span><span>速度 <b>'+c.spd+'</b></span>';
     const mv=document.createElement('div');mv.className='moves-mini';mv.textContent=c.moves.map(m=>MOVES[m].n).join(' · ');
-    card.append(name,type,fl,st,mv);
-    card.addEventListener('click',()=>{document.querySelectorAll('.card').forEach(x=>x.classList.remove('sel'));card.classList.add('sel');S.selId=c.id;document.getElementById('btnConfirmPick').disabled=false;});
+    const lin=document.createElement('div');lin.className='moves-mini';lin.style.color='var(--muted)';lin.textContent='譜系 '+lineageLabel(c.line);
+    card.append(name,type,stg,fl,st,mv,lin);
+    card.addEventListener('click',()=>togglePick(c.id));
     root.appendChild(card);
   });
+  syncPickCards();renderPartySlots();
+}
+function syncPickCards(){
+  document.querySelectorAll('#roster .card').forEach(card=>{
+    const i=S.pickSel.indexOf(card.dataset.id);
+    card.classList.toggle('sel',i>=0);
+    if(i>=0)card.dataset.ord=String(i+1);else card.removeAttribute('data-ord');
+  });
+}
+function togglePick(id){
+  const i=S.pickSel.indexOf(id);
+  if(i>=0)S.pickSel.splice(i,1);
+  else if(S.pickSel.length<3)S.pickSel.push(id);
+  else{S.pickSel.shift();S.pickSel.push(id);}
+  syncPickCards();renderPartySlots();
 }
 function confirmPick(){
-  const c=CREATURES.find(x=>x.id===S.selId);if(!c)return;
-  S.pet=c;S.petHp=c.hp;document.getElementById('hudPet').textContent=c.n;
-  if(S.fromCenter){S.fromCenter=false;show('map');openDialog('夥伴中心','你帶著「'+c.n+'」出發了！',[{l:'好',fn:closeDialog}]);}
-  else{S.px=13.5;S.py=15.5;show('map');openDialog('園區導覽員','歡迎來到靈獸樂園！「'+c.n+'」會跟著你。對戰為即時操作：移動鍵走位，攻擊鍵（5秒冷卻）與招式（10秒冷卻）！',[{l:'出發！',fn:closeDialog}]);}
+  if(!S.pickSel.length)return;
+  const prev=new Map(S.party.map(p=>[p.id,p.hp]));
+  S.party=S.pickSel.map(id=>{
+    const c=byId(id);const old=prev.get(id);
+    return{id,hp:old!=null?Math.min(old,c.hp):c.hp};
+  });
+  updateHudParty();
+  if(S.fromCenter){S.fromCenter=false;show('map');openDialog('夥伴中心','隊伍已更新！目前 '+S.party.length+' 隻同行。',[ {l:'好',fn:closeDialog}]);}
+  else{S.px=13.5;S.py=15.5;show('map');openDialog('園區導覽員','歡迎來到靈獸樂園！你帶了 '+S.party.length+' 隻夥伴。對戰前可「出戰選配」；倒下會自動換下一位。移動＋攻擊（5秒）＋招式（10秒）！',[ {l:'出發！',fn:closeDialog}]);}
 }
 
+/* DEX */
+function openDex(){S.dexTab='all';S.dexTypes=new Set();show('dex');}
+function renderDex(){
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.toggle('on',t.dataset.tab===S.dexTab));
+  const chips=document.getElementById('dexTypeChips');
+  chips.innerHTML='<span class="lab">屬性</span>';
+  TYPES.forEach(t=>{
+    const b=document.createElement('span');b.className='dchip'+(S.dexTypes.has(t)?' on':'');b.textContent=t;
+    b.onclick=()=>{S.dexTypes.has(t)?S.dexTypes.delete(t):S.dexTypes.add(t);renderDex();};
+    chips.appendChild(b);
+  });
+  const clr=document.createElement('span');clr.className='dchip';clr.textContent='清除';clr.onclick=()=>{S.dexTypes.clear();renderDex();};chips.appendChild(clr);
+  let list=CREATURES.slice();
+  if(S.dexTypes.size)list=list.filter(c=>S.dexTypes.has(c.t));
+  document.getElementById('dexInfo').textContent='顯示 '+list.length+' / '+CREATURES.length+' 隻 · '+LINE_ORDER.length+' 條譜系';
+  const root=document.getElementById('dexList');root.innerHTML='';
+  const mkCard=c=>{
+    const d=document.createElement('div');d.className='dcard';
+    const cv=document.createElement('canvas');cv.width=72;cv.height=72;
+    drawCreature(cv.getContext('2d'),c,72,72,{scale:0.75});
+    const nm=document.createElement('div');nm.className='nm';nm.textContent=c.n;
+    const meta=document.createElement('div');meta.className='meta';
+    meta.innerHTML='<span class="type type-'+c.t+'">'+c.t+'</span> <span class="stg stg'+c.stage+'">'+STAGE_N[c.stage]+'</span>';
+    const st=document.createElement('div');st.className='meta';st.textContent='HP'+c.hp+' 攻'+c.atk+' 防'+c.def+' 速'+c.spd;
+    const mv=document.createElement('div');mv.className='meta';mv.textContent=c.moves.map(m=>MOVES[m].n).join(' · ');
+    const lin=document.createElement('div');lin.className='lin';lin.innerHTML='<b>譜系</b> '+lineageLabel(c.line);
+    const fl=document.createElement('div');fl.className='meta';fl.style.marginTop='4px';fl.textContent=c.flavor;
+    d.append(cv,nm,meta,st,mv,lin,fl);return d;
+  };
+  if(S.dexTab==='line'){
+    LINE_ORDER.forEach(line=>{
+      const g=list.filter(c=>c.line===line);if(!g.length)return;
+      const sec=document.createElement('div');sec.className='dex-group';
+      const h=document.createElement('h3');h.textContent=lineageLabel(line)+'（'+g.length+'）';
+      const grid=document.createElement('div');grid.className='dex-grid';
+      g.sort((a,b)=>a.stage-b.stage).forEach(c=>grid.appendChild(mkCard(c)));
+      sec.append(h,grid);root.appendChild(sec);
+    });
+  }else if(S.dexTab==='stage'){
+    [0,1,2].forEach(s=>{
+      const g=list.filter(c=>c.stage===s);if(!g.length)return;
+      const sec=document.createElement('div');sec.className='dex-group';
+      const h=document.createElement('h3');h.textContent=STAGE_N[s]+'（'+g.length+'）';
+      const grid=document.createElement('div');grid.className='dex-grid';
+      g.forEach(c=>grid.appendChild(mkCard(c)));
+      sec.append(h,grid);root.appendChild(sec);
+    });
+  }else{
+    const grid=document.createElement('div');grid.className='dex-grid';
+    list.forEach(c=>grid.appendChild(mkCard(c)));root.appendChild(grid);
+  }
+}
+
+/* MAP */
 const mapCv=document.getElementById('mapCanvas'),mapCtx=mapCv.getContext('2d');
 let camX=0,camY=0,animT=0;
 function resizeMap(){
@@ -385,10 +723,11 @@ function drawMap(){
     mapCtx.fillStyle='#fff';mapCtx.beginPath();mapCtx.arc(sx-3,sy-4,2,0,Math.PI*2);mapCtx.arc(sx+3,sy-4,2,0,Math.PI*2);mapCtx.fill();
     mapCtx.font='9px "Noto Sans TC",sans-serif';mapCtx.fillStyle='#fff';mapCtx.fillText(npc.n,sx,sy-17);
   });
-  if(S.pet){
+  const L=leader();
+  if(L){
     const ang=S.facing*Math.PI/2,fx=S.px-Math.sin(ang)*.7,fy=S.py+Math.cos(ang)*.7;
     const tmp=document.createElement('canvas');tmp.width=48;tmp.height=48;
-    drawCreature(tmp.getContext('2d'),S.pet,48,48,{scale:0.55});
+    drawCreature(tmp.getContext('2d'),L,48,48,{scale:0.55});
     mapCtx.drawImage(tmp,fx*TS-camX+TS/2-24,fy*TS-camY+TS/2-28+Math.sin(animT*.15)*2);
   }
   const sx=S.px*TS-camX+TS/2,sy=S.py*TS-camY+TS/2;
@@ -405,7 +744,7 @@ function updateZoneHud(){
   if(z.buff){S.zoneBuff=z.buff;const el=document.getElementById('hudBuff');el.style.display='block';el.textContent='地形加持：'+z.buff+'屬性下次攻擊 +10%';}
 }
 function tryMove(dx,dy,dt){
-  if(S.dialogOpen)return;
+  if(S.dialogOpen||document.getElementById('deploy').classList.contains('show'))return;
   const sp=3.2*dt;let nx=S.px+dx*sp,ny=S.py+dy*sp;
   if(Math.abs(dx)>Math.abs(dy))S.facing=dx>0?3:1;else if(dy!==0)S.facing=dy>0?0:2;
   const r=.28;
@@ -421,25 +760,64 @@ function openDialog(title,body,acts){
   document.getElementById('dialog').style.display='block';
 }
 function closeDialog(){S.dialogOpen=false;document.getElementById('dialog').style.display='none';}
+function healParty(){S.party.forEach(p=>{const c=byId(p.id);p.hp=c.hp;});updateHudParty();}
 function interact(){
-  if(S.dialogOpen)return;
+  if(S.dialogOpen||document.getElementById('deploy').classList.contains('show'))return;
   const npc=nearestNpc();
   if(!npc){openDialog('提示','附近沒有可互動的對象。靠近帶名字的人再按「互動」。',[{l:'知道了',fn:closeDialog}]);return;}
-  if(npc.talk==='welcome')openDialog(npc.n,'樂園分為火焰區、水舞湖、青草丘、雷鳴丘與對戰競技場。對戰為即時：移動＋攻擊鍵（5秒）＋招式（10秒）。',[{l:'謝謝',fn:closeDialog}]);
-  else if(npc.talk==='heal')openDialog(npc.n,'讓我幫你的夥伴恢復精神吧～',[
-    {l:'休息恢復',fn:()=>{S.petHp=S.pet.hp;closeDialog();openDialog(npc.n,S.pet.n+' 的體力完全恢復了！',[{l:'謝謝',fn:closeDialog}]);}},
+  if(npc.talk==='welcome')openDialog(npc.n,'樂園有火焰區、水舞湖、青草丘、雷鳴丘與競技場。組最多 3 隻隊伍；開戰前可出戰選配。對戰即時：移動＋攻擊（5秒）＋招式（10秒）；可換手。',[{l:'謝謝',fn:closeDialog}]);
+  else if(npc.talk==='heal')openDialog(npc.n,'讓我幫你的隊伍恢復精神吧～',[
+    {l:'全體恢復',fn:()=>{healParty();closeDialog();openDialog(npc.n,'隊伍體力完全恢復了！',[{l:'謝謝',fn:closeDialog}]);}},
     {l:'不用了',sec:true,fn:closeDialog}]);
-  else if(npc.talk==='center')openDialog(npc.n,'要更換同行的夥伴嗎？',[
-    {l:'重新選寵',fn:()=>{closeDialog();S.fromCenter=true;show('pick');}},{l:'離開',sec:true,fn:closeDialog}]);
+  else if(npc.talk==='center')openDialog(npc.n,'要重新編排同行隊伍嗎？',[
+    {l:'編輯隊伍',fn:()=>{closeDialog();S.fromCenter=true;buildRoster();show('pick');}},
+    {l:'離開',sec:true,fn:closeDialog}]);
   else if(npc.talk==='battle'||npc.talk==='arena'){
-    const foeId=npc.foe||CREATURES.filter(c=>c.id!==S.pet.id)[Math.floor(Math.random()*8)].id;
-    const foe=CREATURES.find(c=>c.id===foeId);
-    openDialog(npc.n,(npc.talk==='arena'?'歡迎來到對戰競技場！對手是「':'我的夥伴是「')+foe.n+'」。即時對戰，準備好了嗎？',[
-      {l:'對戰！',fn:()=>{closeDialog();startBattle(foe,npc);}},{l:'下次再說',sec:true,fn:closeDialog}]);
+    let foes;
+    if(npc.talk==='arena'){
+      const a=ARENA_POOL[Math.floor(Math.random()*ARENA_POOL.length)];
+      const b=ARENA_POOL.filter(x=>x!==a)[Math.floor(Math.random()*(ARENA_POOL.length-1))];
+      foes=[a,b];
+    }else foes=npc.foes.slice();
+    const names=foes.map(id=>byId(id).n).join('、');
+    openDialog(npc.n,(npc.talk==='arena'?'競技場隨機對手：':'對手隊伍：')+names+'。請選配出戰成員。',[
+      {l:'出戰選配',fn:()=>{closeDialog();openDeploy(foes,npc);}},
+      {l:'下次再說',sec:true,fn:closeDialog}]);
   }
 }
 
-/* REALTIME BATTLE */
+/* DEPLOY */
+function openDeploy(foeIds,npc){
+  S.pendingFoes=foeIds;S.pendingNpc=npc;
+  S.deploySel=S.party.filter(p=>p.hp>0).map(p=>p.id).slice(0,3);
+  if(!S.deploySel.length){openDialog('無法出戰','隊伍全員體力耗盡，請先到休息亭恢復。',[{l:'好',fn:closeDialog}]);return;}
+  renderDeploy();document.getElementById('deploy').classList.add('show');
+}
+function renderDeploy(){
+  const root=document.getElementById('deployList');root.innerHTML='';
+  S.party.forEach(p=>{
+    const c=byId(p.id);const i=S.deploySel.indexOf(p.id);
+    const row=document.createElement('div');row.className='deploy-row'+(i>=0?' on':'')+(p.hp<=0?' faint':'');
+    const badge=document.createElement('div');badge.className='ord-badge';badge.textContent=i>=0?String(i+1):'·';
+    const cv=document.createElement('canvas');cv.width=48;cv.height=48;
+    drawCreature(cv.getContext('2d'),c,48,48,{scale:0.5});
+    const info=document.createElement('div');info.className='info';
+    info.innerHTML='<div class="dn">'+c.n+'</div><div class="dmeta"><span class="type type-'+c.t+'">'+c.t+'</span> HP '+Math.max(0,p.hp)+'/'+c.hp+' · '+c.moves.map(m=>MOVES[m].n).join(' / ')+'</div>';
+    row.append(badge,cv,info);
+    row.onclick=()=>{
+      if(p.hp<=0)return;
+      const j=S.deploySel.indexOf(p.id);
+      if(j>=0)S.deploySel.splice(j,1);
+      else if(S.deploySel.length<3)S.deploySel.push(p.id);
+      renderDeploy();
+    };
+    root.appendChild(row);
+  });
+  document.getElementById('btnDeployGo').disabled=S.deploySel.length===0;
+}
+function closeDeploy(){document.getElementById('deploy').classList.remove('show');S.pendingFoes=null;S.pendingNpc=null;}
+
+/* BATTLE */
 const ATK_CD=5,SKL_CD=10;
 const bCv=document.getElementById('battleCanvas'),bCtx=bCv.getContext('2d');
 let bW=0,bH=0,bStick={dx:0,dy:0};
@@ -449,25 +827,63 @@ function resizeBattle(){
   bCv.width=bW*dpr;bCv.height=bH*dpr;bCv.style.width=bW+'px';bCv.style.height=bH+'px';
   bCtx.setTransform(dpr,0,0,dpr,0,0);
 }
-function mkFighter(c,x,y,isPlayer){
-  return{c,x,y,hp:c.hp,max:c.hp,facing:isPlayer?1:-1,atkCd:0,sklCd:0,hitFlash:0,radius:28,speed:90+(c.spd-50)*0.6,isPlayer};
+function mkFighter(c,hp,x,y,isPlayer){
+  return{c,id:c.id,x,y,hp,max:c.hp,facing:isPlayer?1:-1,atkCd:0,sklCd:0,hitFlash:0,radius:28,speed:90+(c.spd-50)*0.6,isPlayer};
 }
-function startBattle(foe,npc){
+function startBattle(foeIds,npc,deployIds){
   resizeBattle();
-  const plHp=S.petHp==null?S.pet.hp:Math.max(1,S.petHp);
-  S.battle={foe,npc,pl:mkFighter(S.pet,bW*0.28,bH*0.55,true),en:mkFighter(foe,bW*0.72,bH*0.45,false),projectiles:[],floats:[],over:false,won:false,buff:S.zoneBuff,t:0,sprites:{}};
-  S.battle.pl.hp=plHp;S.battle.pl.max=S.pet.hp;
-  ['pl','en'].forEach(k=>{const cv=document.createElement('canvas');cv.width=96;cv.height=96;drawCreature(cv.getContext('2d'),k==='pl'?S.battle.pl.c:S.battle.en.c,96,96,{flip:k==='pl'});S.battle.sprites[k]=cv;});
-  document.getElementById('enName').textContent=foe.n;document.getElementById('plName').textContent=S.pet.n;
-  document.getElementById('enType').textContent=foe.t+'屬性';document.getElementById('plType').textContent=S.pet.t+'屬性';
+  const plTeam=deployIds.map((id,i)=>{
+    const c=byId(id);const mem=S.party.find(p=>p.id===id);
+    const hp=mem?Math.max(1,mem.hp):c.hp;
+    return mkFighter(c,hp,bW*(0.22+i*0.02),bH*0.55,true);
+  });
+  const enTeam=foeIds.map((id,i)=>{
+    const c=byId(id);
+    return mkFighter(c,c.hp,bW*(0.72-i*0.02),bH*(0.42+i*0.08),false);
+  });
+  S.battle={
+    npc,foeIds,deployIds,
+    plTeam,enTeam,plIdx:0,enIdx:0,
+    pl:plTeam[0],en:enTeam[0],
+    projectiles:[],floats:[],over:false,won:false,buff:S.zoneBuff,t:0,sprites:{},
+    switching:false,mustSwitch:false
+  };
+  refreshActiveSprites();
   document.getElementById('bResult').classList.remove('show','win','lose');
-  updateBattleHud();updateCdUi();show('battle');
+  document.getElementById('switchPanel').classList.remove('show');
+  updateBattleHud();updateCdUi();updateBenchDots();show('battle');
   if(S.battle.buff)toast('地形加持：'+S.battle.buff+' +10%');
+}
+function refreshActiveSprites(){
+  const B=S.battle;
+  ['pl','en'].forEach(k=>{
+    const cv=document.createElement('canvas');cv.width=96;cv.height=96;
+    drawCreature(cv.getContext('2d'),B[k].c,96,96,{flip:k==='pl'});
+    B.sprites[k]=cv;
+  });
+  document.getElementById('enName').textContent=B.en.c.n;
+  document.getElementById('plName').textContent=B.pl.c.n;
+  document.getElementById('enType').textContent=B.en.c.t+'屬性';
+  document.getElementById('plType').textContent=B.pl.c.t+'屬性';
+}
+function updateBenchDots(){
+  const B=S.battle;if(!B)return;
+  const fill=(el,team,idx)=>{
+    el.innerHTML='';
+    team.forEach((f,i)=>{
+      const d=document.createElement('div');
+      d.className='b-dot'+(f.hp<=0?' faint':'')+(i===idx?' active':'');
+      el.appendChild(d);
+    });
+  };
+  fill(document.getElementById('plDots'),B.plTeam,B.plIdx);
+  fill(document.getElementById('enDots'),B.enTeam,B.enIdx);
 }
 function updateBattleHud(){
   const B=S.battle;if(!B)return;
   const set=(fill,pct,cur,max)=>{const p=Math.max(0,cur/max);document.getElementById(fill).style.width=(p*100)+'%';document.getElementById(fill).style.background=p>.5?'linear-gradient(180deg,#6ee7a8,#22c55e)':p>.25?'linear-gradient(180deg,#fde68a,#f59e0b)':'linear-gradient(180deg,#fca5a5,#ef4444)';document.getElementById(pct).textContent=Math.round(p*100)+'%';};
   set('enHp','enHpPct',B.en.hp,B.en.max);set('plHp','plHpPct',B.pl.hp,B.pl.max);
+  updateBenchDots();
 }
 function toast(msg){const el=document.getElementById('bToast');el.textContent=msg;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),1200);}
 function drawCdRing(id,remain,total){
@@ -484,6 +900,8 @@ function updateCdUi(){
   if(B.pl.atkCd>0){atkN.textContent=Math.ceil(B.pl.atkCd);atkN.classList.add('on');}else{atkN.textContent='';atkN.classList.remove('on');}
   if(B.pl.sklCd>0){sklN.textContent=Math.ceil(B.pl.sklCd);sklN.classList.add('on');}else{sklN.textContent='';sklN.classList.remove('on');}
   drawCdRing('atkRing',B.pl.atkCd,ATK_CD);drawCdRing('sklRing',B.pl.sklCd,SKL_CD);
+  const alive=B.plTeam.filter(f=>f.hp>0).length;
+  document.getElementById('btnSwitch').style.display=alive>=2?'flex':'none';
 }
 function calcDmg(atkC,defC,power,useBuff){
   const mul=typeMul(atkC.t,defC.t),rand=0.85+Math.random()*0.15;
@@ -498,7 +916,7 @@ function fireShot(owner,kind){
   const ang=Math.atan2(target.y-owner.y,target.x-owner.x);
   const dx=Math.cos(ang),dy=Math.sin(ang);
   owner.facing=dx>=0?1:-1;
-  const melee=kind==='atk'&&(owner.c.t==='岩'||owner.c.t==='草');
+  const melee=kind==='atk'&&(owner.c.t==='岩石'||owner.c.t==='草'||owner.c.t==='格鬥'||owner.c.t==='鋼');
   if(melee){
     S.battle.projectiles.push({x:owner.x+dx*40,y:owner.y+dy*40,vx:0,vy:0,life:0.2,maxLife:0.2,rad:38,owner,kind,move,power,melee:true,hit:false,color:owner.c.pal[0]});
   }else{
@@ -506,11 +924,18 @@ function fireShot(owner,kind){
     S.battle.projectiles.push({x:owner.x+dx*22,y:owner.y+dy*10,vx:dx*spd,vy:dy*spd,life:kind==='skl'?1.15:0.75,maxLife:kind==='skl'?1.15:0.75,rad:kind==='skl'?16:11,owner,kind,move,power,melee:false,hit:false,color:owner.c.pal[0]});
   }
 }
-function tryPlayerAtk(){const B=S.battle;if(!B||B.over||B.pl.atkCd>0)return;B.pl.atkCd=ATK_CD;fireShot(B.pl,'atk');updateCdUi();}
+function tryPlayerAtk(){const B=S.battle;if(!B||B.over||B.switching||B.pl.atkCd>0)return;B.pl.atkCd=ATK_CD;fireShot(B.pl,'atk');updateCdUi();}
 function tryPlayerSkl(){
-  const B=S.battle;if(!B||B.over||B.pl.sklCd>0)return;B.pl.sklCd=SKL_CD;fireShot(B.pl,'skl');
+  const B=S.battle;if(!B||B.over||B.switching||B.pl.sklCd>0)return;B.pl.sklCd=SKL_CD;fireShot(B.pl,'skl');
   if(B.buff===B.pl.c.t){toast('地形加持！');B.buff=null;S.zoneBuff=null;document.getElementById('hudBuff').style.display='none';}
   updateCdUi();
+}
+function syncPartyHpFromBattle(){
+  const B=S.battle;if(!B)return;
+  B.plTeam.forEach(f=>{
+    const mem=S.party.find(p=>p.id===f.id);if(mem)mem.hp=Math.max(0,f.hp);
+  });
+  updateHudParty();
 }
 function applyHit(proj,target){
   if(proj.hit)return;proj.hit=true;proj.life=0;
@@ -519,17 +944,77 @@ function applyHit(proj,target){
   target.hp-=r.dmg;target.hitFlash=0.25;
   S.battle.floats.push({x:target.x,y:target.y-30,text:'-'+r.dmg+(r.mul>1?'!':r.mul<1?'…':''),life:0.8,color:r.mul>1?'#fbbf24':r.mul<1?'#94a3b8':'#fff'});
   updateBattleHud();
-  if(target.hp<=0){target.hp=0;endBattle(target!==S.battle.pl);}
+  if(target.hp<=0){target.hp=0;onFaint(target);}
+}
+function onFaint(target){
+  const B=S.battle;if(!B||B.over)return;
+  syncPartyHpFromBattle();
+  if(target.isPlayer){
+    toast(target.c.n+' 倒下了！');
+    const next=B.plTeam.findIndex((f,i)=>i!==B.plIdx&&f.hp>0);
+    if(next<0){endBattle(false);return;}
+    B.mustSwitch=true;B.switching=true;
+    openSwitchPanel(true);
+  }else{
+    toast(target.c.n+' 倒下了！');
+    const next=B.enTeam.findIndex((f,i)=>i!==B.enIdx&&f.hp>0);
+    if(next<0){endBattle(true);return;}
+    setTimeout(()=>switchEnemy(next),400);
+  }
+}
+function switchEnemy(idx){
+  const B=S.battle;if(!B||B.over)return;
+  B.enIdx=idx;B.en=B.enTeam[idx];
+  B.en.x=bW*0.72;B.en.y=bH*0.45;B.en.atkCd=0.5;B.en.sklCd=1;
+  refreshActiveSprites();updateBattleHud();toast('對手派出 '+B.en.c.n+'！');
+}
+function openSwitchPanel(forced){
+  const B=S.battle;if(!B)return;
+  B.switching=true;B.mustSwitch=!!forced;
+  const root=document.getElementById('switchList');root.innerHTML='';
+  B.plTeam.forEach((f,i)=>{
+    if(i===B.plIdx&&!forced)return;
+    if(f.hp<=0)return;
+    if(i===B.plIdx)return;
+    const row=document.createElement('div');row.className='deploy-row';
+    const cv=document.createElement('canvas');cv.width=48;cv.height=48;
+    drawCreature(cv.getContext('2d'),f.c,48,48,{scale:0.5});
+    const info=document.createElement('div');info.className='info';
+    info.innerHTML='<div class="dn">'+f.c.n+'</div><div class="dmeta">HP '+Math.max(0,Math.round(f.hp))+'/'+f.max+' · '+f.c.t+'</div>';
+    row.append(cv,info);
+    row.onclick=()=>doSwitch(i);
+    root.appendChild(row);
+  });
+  document.getElementById('btnSwitchCancel').style.display=forced?'none':'inline-block';
+  document.getElementById('switchPanel').classList.add('show');
+}
+function doSwitch(idx){
+  const B=S.battle;if(!B)return;
+  const f=B.plTeam[idx];if(!f||f.hp<=0)return;
+  B.plIdx=idx;B.pl=f;
+  B.pl.x=bW*0.28;B.pl.y=bH*0.55;B.pl.atkCd=Math.max(B.pl.atkCd,0.3);B.pl.sklCd=Math.max(B.pl.sklCd,0.3);
+  B.switching=false;B.mustSwitch=false;
+  document.getElementById('switchPanel').classList.remove('show');
+  refreshActiveSprites();updateBattleHud();updateCdUi();
+  toast('換上 '+f.c.n+'！');
+}
+function tryOpenSwitch(){
+  const B=S.battle;if(!B||B.over||B.switching)return;
+  const alive=B.plTeam.filter((f,i)=>i!==B.plIdx&&f.hp>0);
+  if(alive.length<1){toast('沒有可換的夥伴');return;}
+  openSwitchPanel(false);
 }
 function endBattle(won){
-  const B=S.battle;if(!B||B.over)return;B.over=true;B.won=won;S.petHp=Math.max(0,B.pl.hp);
+  const B=S.battle;if(!B||B.over)return;B.over=true;B.won=won;B.switching=false;
+  document.getElementById('switchPanel').classList.remove('show');
+  syncPartyHpFromBattle();
   const res=document.getElementById('bResult');res.classList.add('show',won?'win':'lose');
   document.getElementById('bResTitle').textContent=won?'勝利！':'落敗…';
-  document.getElementById('bResMsg').textContent=won?S.pet.n+' 表現出色！可到休息亭恢復後再挑戰。':S.pet.n+' 倒下了。回休息亭恢復後再試一次吧。';
+  document.getElementById('bResMsg').textContent=won?'隊伍表現出色！可到休息亭恢復後再挑戰。':'全員倒下了。回休息亭恢復後再試一次吧。';
 }
 function clampArena(f){f.x=Math.max(40,Math.min(bW-40,f.x));f.y=Math.max(80,Math.min(bH-100,f.y));}
 function updateAI(dt){
-  const B=S.battle;if(!B||B.over)return;
+  const B=S.battle;if(!B||B.over||B.switching)return;
   const en=B.en,pl=B.pl,dx=pl.x-en.x,dy=pl.y-en.y,dist=Math.hypot(dx,dy)||1;
   let mx=dx/dist,my=dy/dist;
   if(dist<95){mx=-mx;my=-my;}else if(dist<170){const sx=-dy/dist,sy=dx/dist;mx=sx*0.7+mx*0.3;my=sy*0.7+my*0.3;}
@@ -539,7 +1024,7 @@ function updateAI(dt){
 }
 function updateBattle(dt){
   const B=S.battle;if(!B||S.screen!=='battle')return;
-  B.t+=dt;if(B.over){drawBattle();return;}
+  B.t+=dt;if(B.over||B.switching){drawBattle();return;}
   B.pl.atkCd=Math.max(0,B.pl.atkCd-dt);B.pl.sklCd=Math.max(0,B.pl.sklCd-dt);
   B.en.atkCd=Math.max(0,B.en.atkCd-dt);B.en.sklCd=Math.max(0,B.en.sklCd-dt);
   B.pl.hitFlash=Math.max(0,B.pl.hitFlash-dt);B.en.hitFlash=Math.max(0,B.en.hitFlash-dt);
@@ -551,6 +1036,7 @@ function updateBattle(dt){
   clampArena(B.pl);
   if(S.keys['j']||S.keys[' ']){if(!updateBattle._j)tryPlayerAtk();updateBattle._j=true;}else updateBattle._j=false;
   if(S.keys['k']||S.keys['enter']){if(!updateBattle._k)tryPlayerSkl();updateBattle._k=true;}else updateBattle._k=false;
+  if(S.keys['u']||S.keys['l']){if(!updateBattle._u)tryOpenSwitch();updateBattle._u=true;}else updateBattle._u=false;
   updateAI(dt);
   for(let i=B.projectiles.length-1;i>=0;i--){
     const p=B.projectiles[i];p.life-=dt;if(!p.melee){p.x+=p.vx*dt;p.y+=p.vy*dt;}
@@ -569,6 +1055,7 @@ function drawBattle(){
   ctx.beginPath();ctx.ellipse(bW/2,bH*.52,Math.min(bW,bH)*.38,Math.min(bW,bH)*.22,0,0,Math.PI*2);ctx.stroke();
   ctx.fillStyle='rgba(255,255,255,.04)';ctx.beginPath();ctx.ellipse(bW/2,bH*.52,Math.min(bW,bH)*.38,Math.min(bW,bH)*.22,0,0,Math.PI*2);ctx.fill();
   const drawF=(f,key)=>{
+    if(f.hp<=0&&(key==='pl'?B.pl:B.en)!==f)return;
     const bob=Math.sin(B.t*6+(key==='pl'?0:1))*3;
     ctx.save();if(f.hitFlash>0)ctx.globalAlpha=.5+.5*Math.sin(B.t*40);
     ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(f.x,f.y+34,26,9,0,0,Math.PI*2);ctx.fill();
@@ -600,6 +1087,12 @@ function drawBattle(){
 })();
 document.getElementById('btnAtk').onclick=tryPlayerAtk;
 document.getElementById('btnSkl').onclick=tryPlayerSkl;
+document.getElementById('btnSwitch').onclick=tryOpenSwitch;
+document.getElementById('btnSwitchCancel').onclick=()=>{
+  const B=S.battle;if(B&&B.mustSwitch)return;
+  if(B)B.switching=false;
+  document.getElementById('switchPanel').classList.remove('show');
+};
 
 (function setupStick(){
   const wrap=document.getElementById('stickWrap'),knob=document.getElementById('stickKnob');
@@ -614,7 +1107,7 @@ document.getElementById('btnSkl').onclick=tryPlayerSkl;
 window.addEventListener('keydown',e=>{
   S.keys[e.key.toLowerCase()]=true;
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase()))e.preventDefault();
-  if((e.key===' '||e.key==='Enter')&&S.screen==='map'&&!S.dialogOpen)interact();
+  if((e.key===' '||e.key==='Enter')&&S.screen==='map'&&!S.dialogOpen&&!document.getElementById('deploy').classList.contains('show'))interact();
   if(e.key==='Escape'&&S.dialogOpen)closeDialog();
 });
 window.addEventListener('keyup',e=>{S.keys[e.key.toLowerCase()]=false;});
@@ -622,7 +1115,7 @@ window.addEventListener('keyup',e=>{S.keys[e.key.toLowerCase()]=false;});
 let last=performance.now();
 function loop(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;animT++;
-  if(S.screen==='map'&&!S.dialogOpen){
+  if(S.screen==='map'&&!S.dialogOpen&&!document.getElementById('deploy').classList.contains('show')){
     let dx=0,dy=0;
     if(S.keys['w']||S.keys['arrowup'])dy-=1;if(S.keys['s']||S.keys['arrowdown'])dy+=1;
     if(S.keys['a']||S.keys['arrowleft'])dx-=1;if(S.keys['d']||S.keys['arrowright'])dx+=1;
@@ -636,23 +1129,43 @@ function loop(now){
 
 document.getElementById('btnStart').onclick=()=>{buildRoster();show('pick');};
 document.getElementById('btnConfirmPick').onclick=confirmPick;
+document.getElementById('btnPickClear').onclick=()=>{S.pickSel=[];syncPickCards();renderPartySlots();};
 document.getElementById('btnInteract').onclick=interact;
+document.getElementById('btnDexTitle').onclick=openDex;
+document.getElementById('btnDexMap').onclick=openDex;
+document.getElementById('btnDexBack').onclick=()=>show(S.party.length?'map':'title');
+document.querySelectorAll('.dtab').forEach(t=>t.onclick=()=>{S.dexTab=t.dataset.tab;renderDex();});
+document.getElementById('btnDeployCancel').onclick=closeDeploy;
+document.getElementById('btnDeployGo').onclick=()=>{
+  if(!S.deploySel.length||!S.pendingFoes)return;
+  const foes=S.pendingFoes,npc=S.pendingNpc,dep=S.deploySel.slice();
+  closeDeploy();startBattle(foes,npc,dep);
+};
 document.getElementById('btnMenu').onclick=()=>{
-  openDialog('選單','夥伴：'+(S.pet?S.pet.n:'—')+'　HP：'+(S.petHp??'—')+'/'+(S.pet?S.pet.hp:'—'),[
-    {l:'夥伴中心',fn:()=>{closeDialog();S.fromCenter=true;show('pick');}},
+  const names=S.party.map(p=>byId(p.id).n).join('、')||'—';
+  openDialog('選單','隊伍：'+names,[
+    {l:'夥伴中心',fn:()=>{closeDialog();S.fromCenter=true;buildRoster();show('pick');}},
+    {l:'靈獸圖鑑',fn:()=>{closeDialog();openDex();}},
     {l:'回標題',sec:true,fn:()=>{closeDialog();show('title');}},
     {l:'關閉',sec:true,fn:closeDialog}
   ]);
 };
-document.getElementById('btnRematch').onclick=()=>{if(S.petHp<=0)S.petHp=S.pet.hp;startBattle(S.battle.foe,S.battle.npc);};
-document.getElementById('btnBackMap').onclick=()=>{if(S.petHp<=0)S.petHp=Math.max(1,Math.floor(S.pet.hp*0.3));show('map');};
+document.getElementById('btnRematch').onclick=()=>{
+  const B=S.battle;if(!B)return;
+  const foes=B.foeIds,npc=B.npc;
+  S.party.forEach(p=>{if(p.hp<=0)p.hp=byId(p.id).hp;});
+  updateHudParty();show('map');openDeploy(foes,npc);
+};
+document.getElementById('btnBackMap').onclick=()=>{
+  S.party.forEach(p=>{if(p.hp<=0)p.hp=Math.max(1,Math.floor(byId(p.id).hp*0.3));});
+  updateHudParty();show('map');
+};
 window.addEventListener('resize',()=>{if(S.screen==='map'){resizeMap();drawMap();}if(S.screen==='battle'){resizeBattle();if(S.battle){S.battle.pl.x=Math.min(S.battle.pl.x,bW-40);S.battle.en.x=Math.min(S.battle.en.x,bW-40);}}});
 
 drawTitleArt();
 requestAnimationFrame(loop);
-window.__GAME__={S,CREATURES,MOVES,show,confirmPick,startBattle,tryPlayerAtk,tryPlayerSkl,walkable,zoneAt};
+window.__GAME__={S,CREATURES,MOVES,TYPES,EFF,show,confirmPick,startBattle,openDeploy,openDex,byId,bases,lineageLabel,tryPlayerAtk,tryPlayerSkl,walkable,zoneAt};
 })();
-
 </script>
 </body>
 </html>
