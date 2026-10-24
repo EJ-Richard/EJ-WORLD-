@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c3d55">
+<meta name="description" content="慈濟四大志業島：八座法印島，看見慈善、醫療、教育、人文與賑災、骨髓、環保、社區志工走過的路。粉絲整理，附上公開來源。">
+<title>慈濟四大志業島｜一島一法印</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "../island/vendor/three/build/three.module.min.js",
+    "three/addons/": "../island/vendor/three/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="stage" role="img" aria-label="八座六角形島嶼排成的慈濟法印群島。可點小屋閱讀故事，也可改用清單。">
+    <div id="labels"></div>
+  </div>
+
+  <div id="hud">
+    <header id="top">
+      <a class="brand" href="./">
+        <span class="seal" aria-hidden="true">慈</span>
+        <span>
+          <h1>慈濟四大志業島</h1>
+          <p id="brand-sub">一島一法印｜看見慈濟人走過的路</p>
+        </span>
+      </a>
+      <form id="search-form" role="search">
+        <input id="q" type="search" placeholder="搜尋，例如新芽、骨髓、環保" aria-label="搜尋志業或關鍵字" autocomplete="off" enterkeyhint="search">
+      </form>
+    </header>
+    <div id="chips" role="toolbar" aria-label="法印篩選"></div>
+    <nav class="tools" aria-label="島上操作">
+      <button type="button" id="btn-home">全景</button>
+      <button type="button" id="btn-list" aria-pressed="false">清單</button>
+      <button type="button" id="btn-petal" aria-pressed="true">花瓣</button>
+      <button type="button" id="btn-help" aria-label="導覽">?</button>
+    </nav>
+  </div>
+
+  <p id="hint" class="glass">點一座島，再點小屋。金色岸邊的四座，是四大志業。</p>
+
+  <aside id="list" hidden aria-label="足跡清單">
+    <div class="sheet-handle"><i></i></div>
+    <div class="list-head">
+      <div>
+        <p class="eyebrow">八大法印</p>
+        <h2>用清單走一遍</h2>
+      </div>
+      <button type="button" id="list-close" aria-label="關閉清單">×</button>
+    </div>
+    <p class="list-note" id="list-note">點一則，鏡頭會飛到那棟小屋。</p>
+    <div id="list-body"></div>
+  </aside>
+
+  <article id="panel" hidden aria-label="足跡內容">
+    <button type="button" class="sheet-handle" id="panel-expand" aria-label="展開或收合"> <i></i></button>
+    <button type="button" class="panel-close" id="panel-close" aria-label="關閉">×</button>
+    <div id="panel-body"></div>
+  </article>
+
+  <footer>
+    <a href="../">← 返回索引</a>
+    <span>粉絲整理・非官方網站</span>
+    <span id="foot-count"></span>
+  </footer>
+
+  <div id="help" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <p class="eyebrow">慢慢走就好</p>
+      <h2 id="help-title">怎麼走這座島</h2>
+      <ol>
+        <li>拖曳可旋轉，滾輪或兩指可拉近、拉遠。</li>
+        <li>點一座島，島上的小屋名字會浮出來；點小屋可讀故事。</li>
+        <li>上方的法印與搜尋，會把其他島先輕輕淡去。</li>
+        <li>每一則都附公開來源。年份和數字只寫出處裡有的。</li>
+      </ol>
+      <div class="modal-actions">
+        <button type="button" id="help-close">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="intro">
+    <div class="modal">
+      <p class="eyebrow">給慈濟人的一張地圖</p>
+      <h2>八座島，八個法印</h2>
+      <p>慈善、醫療、教育、人文，是四大志業；再加上國際賑災、骨髓捐贈、環保、社區志工。點一棟小屋，看見這些路怎麼走過來，也看看它為什麼還值得我們把心念放穩。</p>
+      <div class="modal-actions">
+        <button type="button" id="intro-go">開始走走</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="fallback" hidden>
+    <div class="fallback-inner">
+      <p class="eyebrow">改用文字閱讀</p>
+      <h2>這部裝置暫時無法顯示 3D</h2>
+      <p>八座法印島的故事仍在下面。這是粉絲整理的導覽，不是慈濟官方網站。</p>
+      <div id="fallback-body"></div>
+    </div>
+  </div>
+
+  <div id="live" class="sr" aria-live="polite"></div>
+  <div id="loading" role="status">正在把八座法印島鋪上海面…</div>
+</div>
+<noscript>
+  <div class="noscript">請開啟 JavaScript，才能看見這座島。你也可以先閱讀 <a href="https://www.tzuchi.org.tw/">慈濟基金會</a> 的公開頁面。</div>
+</noscript>
+<script>
+  window.MISSIONS_BOOTED = false;
+  setTimeout(function () {
+    if (window.MISSIONS_BOOTED) return;
+    var loading = document.getElementById("loading");
+    var fallback = document.getElementById("fallback");
+    if (loading) loading.classList.add("hide");
+    if (fallback) fallback.hidden = false;
+  }, 5000);
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
