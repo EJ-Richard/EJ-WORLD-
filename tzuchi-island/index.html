@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B3D6E">
+<meta name="description" content="慈濟印象攻略島：七個話題、一段澄清、附上公開來源。立體蕃薯島只是示意。">
+<title>慈濟印象攻略島</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "../island/vendor/three/build/three.module.min.js",
+    "three/addons/": "../island/vendor/three/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <svg id="flat" viewBox="0 0 10 10" role="img" aria-label="六角形拼成的台灣輪廓。七座白島是話題，其餘是地形。"></svg>
+    <div id="labels"></div>
+  </div>
+
+  <header id="top">
+    <a class="brand" href="./">
+      <span class="seal" aria-hidden="true">慈</span>
+      <span>
+        <h1>慈濟印象攻略島</h1>
+        <p>一島一話題｜澄清印象，附上權威來源</p>
+      </span>
+    </a>
+    <form id="search-form" role="search">
+      <input id="q" type="search" placeholder="搜尋話題，例如內湖、疫苗、徵信" aria-label="搜尋話題" autocomplete="off" enterkeyhint="search">
+    </form>
+  </header>
+
+  <nav class="tools" aria-label="島上操作">
+    <button type="button" id="btn-home">全景</button>
+    <button type="button" id="btn-about">總覽</button>
+    <button type="button" id="btn-list" aria-pressed="false">清單</button>
+  </nav>
+  <p class="compass" aria-hidden="true">北</p>
+
+  <aside id="list" hidden aria-label="七個話題">
+    <div class="list-head">
+      <div>
+        <p class="eyebrow">七座話題島</p>
+        <h2>用清單讀</h2>
+      </div>
+      <button type="button" id="list-close" aria-label="關閉清單">×</button>
+    </div>
+    <p class="list-note">點一座島，或點清單。白島才有說明，其餘六角形是地形。</p>
+    <div id="list-body"></div>
+  </aside>
+
+  <article id="panel" hidden aria-label="話題說明">
+    <button type="button" id="sheet-handle" class="sheet-handle" aria-label="展開或收合"><i></i></button>
+    <button type="button" id="panel-close" aria-label="關閉說明">×</button>
+    <div id="panel-body"></div>
+  </article>
+
+  <footer>
+    <a href="../">← 返回索引</a>
+    <span>內容摘要公開聲明與新聞，並附來源。立體島是示意。</span>
+    <span>粉絲整理・非官方</span>
+  </footer>
+
+  <div id="live" class="sr" aria-live="polite"></div>
+  <div id="loading" role="status">正在把話題鋪上島…</div>
+</div>
+<noscript>
+  <div class="noscript">
+    <h1>慈濟印象攻略島</h1>
+    <p>這個頁面用 JavaScript 呈現立體島與七則說明。請啟用 JavaScript 後再看。下面是原始資料的入口，方便先查來源。</p>
+    <ul>
+      <li><a href="https://enews.url.com.tw/tzuchi/80482">內湖園區撤案聲明</a></li>
+      <li><a href="https://www.tcnews.com.tw/column/item/30250.html">BNT 採購聲明（2026/08/06）</a></li>
+      <li><a href="https://tzuchi-csr.org.tw/financial.php">財務揭露</a></li>
+      <li><a href="https://www.tcnews.com.tw/column/item/21704.html">不實訊息提醒</a></li>
+      <li><a href="https://www.tzuchi.org.tw/我們所做的/災害防救/災害救助">災害救助</a></li>
+      <li><a href="https://www.tzuchi.org.tw/年度報告書">年度報告書</a></li>
+      <li><a href="https://hlm.tzuchi.com.tw/home/index.php/news/news/log-declare">花蓮慈濟醫院聲明公告</a></li>
+    </ul>
+  </div>
+</noscript>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
