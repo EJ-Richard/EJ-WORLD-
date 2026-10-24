@@ -53,6 +53,11 @@ button{font-family:inherit;cursor:pointer}
 #hallPanel h2{margin:0 0 4px;color:#8b4513;font-size:22px}
 #hallPanel .region{font-size:12px;color:#888;margin-bottom:10px}
 .vignette{height:110px;border-radius:12px;margin-bottom:12px;display:flex;align-items:flex-end;padding:10px;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 3px #0008;background-size:cover;background-position:center}
+.hall-photo{display:none;margin:0 0 12px}
+.hall-photo.show{display:block}
+.hall-photo img{display:block;width:100%;aspect-ratio:16/10;max-height:220px;object-fit:cover;object-position:center;border-radius:14px;border:2px solid #e0c48a;box-shadow:0 4px 0 #0001;background:#1a3040}
+.hall-credit{margin-top:6px;font-size:12px;line-height:1.45;color:#5a4a32}
+.hall-credit a{color:#8b4513;font-weight:700}
 .intro{font-size:14px;line-height:1.65;color:#3a3020;margin:0 0 10px}
 .highlights{margin:0 0 14px;padding-left:18px;font-size:13.5px;line-height:1.55;color:#3a3020}
 .highlights li{margin:4px 0}
@@ -161,6 +166,10 @@ button{font-family:inherit;cursor:pointer}
 <div id="hallPanel">
   <div class="inner">
     <div class="vignette" id="hallVig"></div>
+    <figure class="hall-photo" id="hallPhoto">
+      <img id="hallPhotoImg" alt="" loading="lazy" decoding="async">
+      <figcaption class="hall-credit" id="hallPhotoCredit"></figcaption>
+    </figure>
     <h2 id="hallTitle"></h2>
     <div class="region" id="hallRegion"></div>
     <p class="intro" id="hallIntro"></p>
@@ -232,6 +241,7 @@ const HALLS = [
       '靜思竹軒：插榫擠籠古法竹屋（全台唯一）'
     ],
     stamp:{name:'飛天印', icon:'✨'},
+    photo:{src:'photos/hualien.jpg', alt:'花蓮靜思堂外觀', author:'Fred Hsu', license:'CC BY-SA 3.0', href:'https://commons.wikimedia.org/wiki/File:Taiwan_2009_HuaLien_City_JingSi_Hall_FRD.jpg'},
     vignette:['#8a9aaa','#4a5a6a'],
     quiz:[
       {q:'花蓮靜思堂簷梁上的飛天浮雕約有幾尊？', opts:['36 尊','108 尊','362 尊','1000 尊'], a:2},
@@ -249,6 +259,7 @@ const HALLS = [
       '大愛人文媒體總部（影音、出版等）'
     ],
     stamp:{name:'藥草印', icon:'🌿'},
+    photo:{src:'photos/guandu.jpg', alt:'關渡靜思堂外觀', author:'Allervous', license:'CC BY-SA 4.0', href:'https://commons.wikimedia.org/wiki/File:Guandu_Jing_Si_Hall_front_view_20240204a.jpg'},
     vignette:['#6a9a6a','#3a6a4a'],
     quiz:[
       {q:'關渡人文藥草園約有多少種藥草？', opts:['不到 10 種','約 40 種以上','超過 500 種','只有香草'], a:1},
@@ -283,6 +294,7 @@ const HALLS = [
       '現代語彙中的莊嚴道場'
     ],
     stamp:{name:'歇山印', icon:'🏯'},
+    photo:{src:'photos/shuanghe.jpg', alt:'雙和靜思堂外觀', author:'Solomon203', license:'CC BY-SA 3.0', href:'https://commons.wikimedia.org/wiki/File:Tzu_Chi_Shuang_Ho_Jing_Si_Hall_20131104.jpg'},
     vignette:['#9aa0a8','#5a6068'],
     quiz:[
       {q:'雙和靜思堂的高度約為？', opts:['約 8 公尺','約 48 公尺','約 200 公尺','約 2 公尺'], a:1},
@@ -735,9 +747,32 @@ function openHall(id) {
   $('hallRegion').textContent = hall.short + ' · ' + hall.region;
   $('hallIntro').textContent = hall.intro;
   $('hallHighlights').innerHTML = hall.highlights.map(t => `<li>${t}</li>`).join('');
-  const [c1,c2] = hall.vignette;
-  $('hallVig').style.background = `linear-gradient(135deg,${c1},${c2})`;
-  $('hallVig').textContent = hall.stamp.icon + ' ' + hall.name;
+  const photo = $('hallPhoto');
+  const img = $('hallPhotoImg');
+  const credit = $('hallPhotoCredit');
+  if (hall.photo) {
+    $('hallVig').style.display = 'none';
+    img.alt = hall.photo.alt || hall.name;
+    img.src = hall.photo.src;
+    credit.replaceChildren();
+    credit.append('照片：' + hall.photo.author + ' · ');
+    const link = document.createElement('a');
+    link.href = hall.photo.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = hall.photo.license;
+    credit.append(link);
+    photo.classList.add('show');
+  } else {
+    photo.classList.remove('show');
+    img.removeAttribute('src');
+    img.alt = '';
+    credit.replaceChildren();
+    $('hallVig').style.display = '';
+    const [c1,c2] = hall.vignette;
+    $('hallVig').style.background = `linear-gradient(135deg,${c1},${c2})`;
+    $('hallVig').textContent = hall.stamp.icon + ' ' + hall.name;
+  }
   $('stampUnlock').classList.remove('show');
   $('quizBox').style.display = 'block';
   if (state.stamps.has(id)) {
@@ -997,8 +1032,8 @@ function updateFlight(dt) {
   car.position.y += vert * (state.boosting?22:14) * dt;
   car.position.y = Math.max(3, Math.min(60, car.position.y));
   // soft bounds
-  car.position.x = Math.max(-90, Math.min(90, car.position.x));
-  car.position.z = Math.max(-120, Math.min(100, car.position.z));
+  car.position.x = Math.max(-100, Math.min(100, car.position.x));
+  car.position.z = Math.max(-180, Math.min(140, car.position.z));
   car.rotation.y = state.yaw + Math.PI;
   car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, -(strafe + padTurn)*0.25, 0.1);
   car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, forward*0.08 - vert*0.05, 0.1);
