@@ -224,6 +224,7 @@ const HALLS = [
       '簡素莊嚴，無華麗裝飾'
     ],
     stamp:{name:'初心印', icon:'🪷'},
+    photo:{src:'photos/jingshe.jpg', alt:'花蓮靜思精舍外觀', credit:'EJ 提供'},
     vignette:['#5a7a5a','#2d4a2d'],
     quiz:[
       {q:'靜思精舍常住眾的生活原則之一是？', opts:['依賴信徒供養','一日不作，一日不食','商業營運維生','政府補助'], a:1},
@@ -808,13 +809,17 @@ function openHall(id) {
     img.alt = hall.photo.alt || hall.name;
     img.src = hall.photo.src;
     credit.replaceChildren();
-    credit.append('照片：' + hall.photo.author + ' · ');
-    const link = document.createElement('a');
-    link.href = hall.photo.href;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = hall.photo.license;
-    credit.append(link);
+    if (hall.photo.href) {
+      credit.append('照片：' + hall.photo.author + ' · ');
+      const link = document.createElement('a');
+      link.href = hall.photo.href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = hall.photo.license;
+      credit.append(link);
+    } else {
+      credit.append('照片：' + (hall.photo.credit || hall.photo.author));
+    }
     photo.classList.add('show');
   } else {
     photo.classList.remove('show');
