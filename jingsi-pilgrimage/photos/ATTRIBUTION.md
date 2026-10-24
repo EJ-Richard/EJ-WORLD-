@@ -7,6 +7,11 @@ Used in 全台靜思堂巡禮 (non-official educational fan game).
 - License: user-supplied photo, not Wikimedia Commons
 - Shown in the visit panel as 「照片：EJ 提供」
 
+## yilan.jpg — 宜蘭靜思堂
+- Author: EJ 提供
+- License: user-supplied photo, not Wikimedia Commons
+- Shown in the visit panel as 「照片：EJ 提供」
+
 ## hualien.jpg — 花蓮靜思堂
 - Author: EJ 提供
 - License: user-supplied photo, not Wikimedia Commons
