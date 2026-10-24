@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>靈獸樂園</title>
+<title>波克萌樂園</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%236ee7a8'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -189,16 +189,16 @@ button:active{transform:scale(.97)}
 <div id="app">
   <div id="title" class="screen active">
     <canvas class="title-art" id="titleArt" width="120" height="120"></canvas>
-    <div class="logo">靈獸樂園</div>
+    <div class="logo">波克萌樂園</div>
     <div class="subtitle">組隊伍 · 逛樂園 · 即時對戰</div>
-    <p class="disclaimer">原創靈獸遊戲，與任天堂／寶可夢官方無關。靈感僅來自粉絲圖鑑的「譜系／屬性瀏覽」體驗，不含任何官方名稱、圖像或招式。</p>
+    <p class="disclaimer">原創遊戲「波克萌樂園」，與任天堂／寶可夢官方無關。靈感僅來自粉絲圖鑑的「譜系／屬性瀏覽」體驗，不含任何官方名稱、圖像或招式。</p>
     <button class="btn" id="btnStart">開始冒險</button>
-    <div class="btn-row"><button class="btn btn-sm btn-sec" id="btnDexTitle">靈獸圖鑑</button></div>
+    <div class="btn-row"><button class="btn btn-sm btn-sec" id="btnDexTitle">波克萌圖鑑</button></div>
   </div>
   <div id="pick" class="screen">
     <div class="pick-head">
       <h2>組建隊伍</h2>
-      <p>挑選 1～3 隻<strong>基礎型</strong>靈獸（點選順序＝出戰順序）</p>
+      <p>挑選 1～3 隻<strong>基礎型</strong>夥伴（點選順序＝出戰順序）</p>
       <div class="party-slots" id="partySlots"></div>
     </div>
     <div class="roster" id="roster"></div>
@@ -209,8 +209,8 @@ button:active{transform:scale(.97)}
   </div>
   <div id="dex" class="screen">
     <div class="dex-top">
-      <h2>靈獸圖鑑</h2>
-      <div class="hint">原創靈獸 · 依屬性篩選 · 譜系以「→」串起</div>
+      <h2>波克萌圖鑑</h2>
+      <div class="hint">原創夥伴 · 依屬性篩選 · 譜系以「→」串起</div>
       <div class="dex-tabs">
         <button class="dtab on" data-tab="all">全部</button>
         <button class="dtab" data-tab="line">譜系</button>
@@ -291,7 +291,7 @@ button:active{transform:scale(.97)}
       </button>
     </div>
     <div class="switch-panel" id="switchPanel">
-      <h3>選擇換上的靈獸</h3>
+      <h3>選擇換上的夥伴</h3>
       <div class="deploy-list" id="switchList"></div>
       <div class="deploy-acts"><button class="btn btn-sm btn-sec" id="btnSwitchCancel">取消</button></div>
     </div>
@@ -623,7 +623,7 @@ function confirmPick(){
   });
   updateHudParty();
   if(S.fromCenter){S.fromCenter=false;show('map');openDialog('夥伴中心','隊伍已更新！目前 '+S.party.length+' 隻同行。',[ {l:'好',fn:closeDialog}]);}
-  else{S.px=13.5;S.py=15.5;show('map');openDialog('園區導覽員','歡迎來到靈獸樂園！你帶了 '+S.party.length+' 隻夥伴。對戰前可「出戰選配」；倒下會自動換下一位。移動＋攻擊（5秒）＋招式（10秒）！',[ {l:'出發！',fn:closeDialog}]);}
+  else{S.px=13.5;S.py=15.5;show('map');openDialog('園區導覽員','歡迎來到波克萌樂園！你帶了 '+S.party.length+' 隻夥伴。對戰前可「出戰選配」；倒下會自動換下一位。移動＋攻擊（5秒）＋招式（10秒）！',[ {l:'出發！',fn:closeDialog}]);}
 }
 
 /* DEX */
@@ -1145,7 +1145,7 @@ document.getElementById('btnMenu').onclick=()=>{
   const names=S.party.map(p=>byId(p.id).n).join('、')||'—';
   openDialog('選單','隊伍：'+names,[
     {l:'夥伴中心',fn:()=>{closeDialog();S.fromCenter=true;buildRoster();show('pick');}},
-    {l:'靈獸圖鑑',fn:()=>{closeDialog();openDex();}},
+    {l:'波克萌圖鑑',fn:()=>{closeDialog();openDex();}},
     {l:'回標題',sec:true,fn:()=>{closeDialog();show('title');}},
     {l:'關閉',sec:true,fn:closeDialog}
   ]);
