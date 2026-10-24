@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060824">
+<title>百萬大挑戰</title>
+<style>
+:root{
+  --bg1:#05061c; --blue:#2a5cff; --cyan:#6fd3ff; --gold:#ffcf4a; --gold2:#ff9d00;
+  --orange:#ff8a00; --green:#19c25a; --red:#e3263a; --line:#8fb4ff; --text:#f2f5ff; --muted:#9aa6d6;
+  --font:"PingFang TC","Noto Sans TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg1);color:var(--text);font-family:var(--font);overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+.hidden{display:none!important}
+#studio{position:fixed;inset:0;overflow:hidden;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 105%, rgba(80,60,255,.55), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(120,60,220,.35), transparent 70%),
+    radial-gradient(circle at 15% 30%, rgba(40,90,255,.18), transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(170,40,255,.18), transparent 40%),
+    linear-gradient(180deg,#07082a 0%, #0d0b3a 45%, #160a3e 100%);}
+.beam{position:absolute;top:-10%;width:22vw;min-width:160px;height:130%;transform-origin:50% 0;
+  background:linear-gradient(180deg,rgba(170,200,255,.30),rgba(120,140,255,.08) 55%,transparent 85%);
+  clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);filter:blur(6px);mix-blend-mode:screen;opacity:.65}
+.beam.b1{left:2%;animation:sway1 9s ease-in-out infinite}
+.beam.b2{left:28%;animation:sway2 11s ease-in-out infinite;background:linear-gradient(180deg,rgba(200,140,255,.28),rgba(150,90,255,.07) 55%,transparent 85%)}
+.beam.b3{right:28%;animation:sway1 12s ease-in-out infinite reverse;background:linear-gradient(180deg,rgba(120,200,255,.28),rgba(90,150,255,.07) 55%,transparent 85%)}
+.beam.b4{right:2%;animation:sway2 10s ease-in-out infinite reverse}
+@keyframes sway1{0%,100%{transform:rotate(18deg)}50%{transform:rotate(-8deg)}}
+@keyframes sway2{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(10deg)}}
+#floor{position:absolute;left:50%;bottom:-18vh;width:140vw;height:45vh;transform:translateX(-50%);
+  border-radius:50%;background:radial-gradient(ellipse at center,rgba(90,120,255,.45),rgba(60,40,200,.15) 45%,transparent 70%)}
+.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.55) 1px,transparent 1.5px);
+  background-size:46px 46px;opacity:.08;-webkit-mask-image:linear-gradient(180deg,#000,transparent 60%);mask-image:linear-gradient(180deg,#000,transparent 60%)}
+#studio.tense .beam{animation-duration:2.2s;opacity:.85}
+#flashOverlay{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:0;transition:opacity .3s}
+#flashOverlay.g{background:radial-gradient(circle,rgba(25,194,90,.35),transparent 70%);opacity:1}
+#flashOverlay.r{background:radial-gradient(circle,rgba(227,38,58,.38),transparent 70%);opacity:1}
+.screen{position:fixed;inset:0;z-index:2;display:flex}
+#startScreen,#endScreen{align-items:center;flex-direction:column;padding:28px 20px;overflow-y:auto;text-align:center}
+#startScreen>:first-child,#endScreen>:first-child{margin-top:auto}
+#startScreen>:last-child,#endScreen>:last-child{margin-bottom:auto}
+.logo{position:relative;width:min(300px,62vw);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:radial-gradient(circle at 50% 40%,#2c3cae,#0a0c3d 70%);border:3px solid #c9d6ff;
+  box-shadow:0 0 0 8px rgba(80,110,255,.25),0 0 60px rgba(110,140,255,.8),inset 0 0 40px rgba(0,0,0,.6);animation:logoPulse 3s ease-in-out infinite;flex:none}
+.logo::before{content:"";position:absolute;inset:-18px;border-radius:50%;border:2px dashed rgba(255,207,74,.55);animation:spin 30s linear infinite}
+.logo .t1{font-size:clamp(30px,8.6vw,48px);font-weight:900;letter-spacing:2px;white-space:nowrap;background:linear-gradient(180deg,#fff6c9,#ffcf4a 45%,#ff9d00);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.logo .t2{font-size:clamp(11px,3vw,15px);letter-spacing:3px;color:#cfe0ff;margin-top:6px}
+.logo .t3{font-size:clamp(18px,4.6vw,24px);color:var(--gold);font-weight:800;margin-top:6px}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 0 8px rgba(80,110,255,.25),0 0 50px rgba(110,140,255,.7),inset 0 0 40px rgba(0,0,0,.6)}50%{box-shadow:0 0 0 12px rgba(80,110,255,.18),0 0 90px rgba(150,120,255,.95),inset 0 0 40px rgba(0,0,0,.6)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.startPanel{margin-top:34px;width:min(440px,100%);display:flex;flex-direction:column;gap:12px}
+.field{display:flex;align-items:center;gap:10px;background:rgba(10,16,60,.75);border:1px solid rgba(143,180,255,.45);border-radius:12px;padding:8px 12px;text-align:left}
+.field label{flex:none;color:var(--muted);font-size:14px;min-width:56px}
+.field input,.field select{flex:1;min-width:0;background:transparent;border:0;color:var(--text);font-size:16px;font-family:inherit;outline:none;padding:4px 0}
+.field select option{background:#0b1240}
+.field input[type=checkbox]{flex:none;width:20px;height:20px;accent-color:var(--gold)}
+.btn{border:0;border-radius:999px;padding:12px 22px;font-size:17px;font-weight:700;color:#1a1030;
+  background:linear-gradient(180deg,#ffe58a,#ffbf2e 55%,#f29a00);box-shadow:0 0 18px rgba(255,190,40,.55),inset 0 -3px 0 rgba(0,0,0,.2);transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.big{font-size:22px;padding:15px 26px;letter-spacing:4px}
+.btn.ghost{background:rgba(20,30,90,.7);color:var(--text);border:1px solid rgba(143,180,255,.6);box-shadow:0 0 12px rgba(80,120,255,.35)}
+.btn.red{background:linear-gradient(180deg,#ff8a95,#e3263a 60%,#a0101f);color:#fff}
+.btnRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btnRow .btn{flex:1;min-width:130px}
+.poolInfo{font-size:13px;color:var(--muted);line-height:1.6}
+.poolInfo b{color:var(--gold)}
+#gameScreen{flex-direction:row}
+#stage{flex:1;min-width:0;display:flex;flex-direction:column;padding:14px 22px 16px;overflow-y:auto;overflow-x:hidden}
+#ladder{width:270px;flex:none;background:linear-gradient(180deg,rgba(8,12,50,.92),rgba(18,10,60,.92));border-left:2px solid rgba(143,180,255,.35);
+  box-shadow:-10px 0 40px rgba(0,0,0,.5);padding:14px 12px;display:flex;flex-direction:column;overflow-y:auto;z-index:20;transition:transform .3s}
+#ladder h3{margin:0 0 8px;text-align:center;color:var(--gold);letter-spacing:3px;font-size:16px}
+#ladderList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#ladderList li{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;font-size:16px;font-weight:700;color:#ffb648;font-variant-numeric:tabular-nums;transition:background .3s}
+#ladderList li .n{width:24px;text-align:right;color:#c7d2ff;font-weight:600;font-size:14px}
+#ladderList li .dia{width:12px;color:transparent;font-size:12px}
+#ladderList li.passed .dia{color:var(--gold)}
+#ladderList li.safe{color:#fff}
+#ladderList li .tag{margin-left:auto;font-size:11px;padding:1px 7px;border-radius:999px;background:rgba(255,207,74,.18);color:var(--gold);border:1px solid rgba(255,207,74,.5)}
+#ladderList li.current{background:linear-gradient(90deg,#ff9d00,#ffcf4a);color:#1b1030;box-shadow:0 0 16px rgba(255,190,40,.7)}
+#ladderList li.current .n{color:#1b1030}
+#ladderList li.current .tag{color:#1b1030;border-color:#1b1030;background:rgba(255,255,255,.3)}
+#ladderList li.top:not(.current){color:#fff3c4}
+.ladderLegend{margin-top:auto;padding-top:10px;font-size:12px;color:var(--muted);line-height:1.6}
+#ladderClose{display:none}
+.topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lifelines{display:flex;gap:10px;padding-bottom:16px}
+.ll{position:relative;width:64px;height:42px;border-radius:50%;border:2px solid #c9d6ff;background:radial-gradient(circle at 50% 35%,#3557ff,#0c1660 75%);
+  color:#fff;font-weight:800;font-size:15px;box-shadow:0 0 14px rgba(90,140,255,.6);display:flex;align-items:center;justify-content:center;padding:0;transition:transform .15s,opacity .2s}
+.ll:hover:not(:disabled){transform:scale(1.07)}
+.ll .lbl{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font-size:11px;color:var(--muted);white-space:nowrap;font-weight:500}
+.ll.used{opacity:.45}
+.ll.used::after{content:"";position:absolute;inset:-4px;background:
+  linear-gradient(33deg,transparent 46%,#ff2a3d 46%,#ff2a3d 54%,transparent 54%),
+  linear-gradient(-33deg,transparent 46%,#ff2a3d 46%,#ff2a3d 54%,transparent 54%)}
+.ll.nospare{opacity:.35}
+.ll:disabled{cursor:not-allowed}
+.timerWrap{margin-left:auto;display:flex;align-items:center;gap:8px;padding-bottom:16px}
+#timer{position:relative;width:54px;height:54px;flex:none}
+#timer svg{transform:rotate(-90deg);width:100%;height:100%}
+#timer circle{fill:none;stroke-width:5}
+#timer .bgc{stroke:rgba(255,255,255,.12)}
+#timer .fg{stroke:var(--cyan);stroke-linecap:round;transition:stroke-dashoffset .95s linear,stroke .3s}
+#timer.warn .fg{stroke:var(--red)}
+#timer.warn #timerNum{color:#ff7884;animation:beat 1s infinite}
+#timerNum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+#timer.off #timerNum{font-size:22px;color:var(--muted)}
+@keyframes beat{50%{transform:scale(1.18)}}
+.iconBtn{background:rgba(20,30,90,.7);border:1px solid rgba(143,180,255,.5);color:var(--text);border-radius:10px;height:38px;min-width:38px;padding:0 10px;font-size:15px;white-space:nowrap}
+#walkBtn{border-radius:999px;font-size:14px;padding:0 14px;background:rgba(80,20,40,.6);border-color:rgba(255,140,150,.6)}
+#walkBtn:disabled{opacity:.4;cursor:not-allowed}
+#ladderToggle{display:none}
+.hostBar{margin:8px auto 0;display:flex;align-items:center;gap:12px;max-width:900px;width:100%}
+.hostAv{flex:none;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#5d78ff,#1a1f6e);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 16px rgba(255,207,74,.5)}
+.hostBubble{flex:1;position:relative;background:rgba(8,12,48,.82);border:1px solid rgba(143,180,255,.45);border-radius:14px;padding:8px 14px;min-height:62px;font-size:16px;line-height:1.5}
+.hostBubble::before{content:"";position:absolute;left:-8px;top:20px;border:8px solid transparent;border-left:0;border-right-color:rgba(143,180,255,.45)}
+.hostName{font-size:12px;color:var(--gold);letter-spacing:1px}
+.hostText.typing::after{content:"▍";margin-left:2px;animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.stageLogo{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:14px 0 0;pointer-events:none}
+.stageLogo .mini{height:min(190px,100%);max-height:100%;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:2px solid rgba(201,214,255,.45);background:radial-gradient(circle at 50% 40%,rgba(44,60,174,.55),rgba(10,12,61,.25) 70%);box-shadow:0 0 50px rgba(110,140,255,.45);opacity:.55;animation:logoPulse 4s ease-in-out infinite}
+.stageLogo .mini b{font-size:clamp(16px,2.4vw,26px);font-weight:900;white-space:nowrap;background:linear-gradient(180deg,#fff6c9,#ffcf4a 45%,#ff9d00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stageLogo .mini span{font-size:12px;color:#cfe0ff;margin-top:4px;letter-spacing:1px}
+@media (max-height:620px){.stageLogo .mini{display:none}}
+.board{flex:none;padding-top:18px;max-width:1000px;width:100%;align-self:center}
+.levelInfo{text-align:center;font-size:14px;color:#cfe0ff;margin-bottom:8px;letter-spacing:1px}
+.levelInfo b{color:var(--gold);font-size:17px}
+.hexWrap{position:relative;filter:drop-shadow(0 0 8px rgba(110,160,255,.55))}
+.hexWrap::before{content:"";position:absolute;left:-22px;right:-22px;top:50%;height:2px;background:linear-gradient(90deg,transparent,var(--line) 20%,var(--line) 80%,transparent);z-index:-1}
+.hex{--cut:26px;padding:2px;background:linear-gradient(90deg,#6f8fe0,#eef3ff 50%,#6f8fe0);
+  clip-path:polygon(0 50%,var(--cut) 0,calc(100% - var(--cut)) 0,100% 50%,calc(100% - var(--cut)) 100%,var(--cut) 100%)}
+.hex>.in{clip-path:polygon(0 50%,var(--cut) 0,calc(100% - var(--cut)) 0,100% 50%,calc(100% - var(--cut)) 100%,var(--cut) 100%);
+  background:linear-gradient(180deg,#0e1f66 0%,#050a2c 55%,#0a1650 100%);display:flex;align-items:center;transition:background .25s}
+#qPanel .hex{--cut:40px}
+#qPanel .in{min-height:110px;justify-content:center;text-align:center;padding:16px 52px;font-size:clamp(17px,2.3vw,23px);font-weight:600;line-height:1.5}
+#qPanel .in.long{font-size:clamp(15px,1.9vw,19px)}
+.answers{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px 26px}
+.opt{cursor:pointer;user-select:none;-webkit-user-select:none;transition:filter .25s,opacity .3s,transform .12s}
+.opt:active{transform:scale(.99)}
+.opt .in{min-height:58px;padding:9px 30px;font-size:clamp(15px,1.75vw,19px);line-height:1.35}
+.opt .letter{color:var(--gold);font-weight:800;margin-right:10px;flex:none}
+.opt .txt{flex:1}
+@media (hover:hover){.opt:hover:not(.removed):not(.selected):not(.locked):not(.correct):not(.wrong) .in{background:linear-gradient(180deg,#1a3196,#0a1550 55%,#13247a)}}
+.opt.selected{filter:drop-shadow(0 0 12px rgba(255,170,40,.9))}
+.opt.selected .hex{background:linear-gradient(90deg,#ff9d00,#fff0c2 50%,#ff9d00)}
+.opt.selected .in{background:linear-gradient(180deg,#3a2a6e,#1b1240 55%,#2a1d5a)}
+.opt.locked{filter:drop-shadow(0 0 16px rgba(255,140,0,1))}
+.opt.locked .hex{background:linear-gradient(90deg,#ffb54a,#fff 50%,#ffb54a)}
+.opt.locked .in{background:linear-gradient(180deg,#ffb340,#ff8a00 55%,#d96800);color:#1d0d00}
+.opt.locked .letter{color:#fff}
+.opt.correct{filter:drop-shadow(0 0 18px rgba(30,230,110,1))}
+.opt.correct .hex{background:linear-gradient(90deg,#6ff0a0,#fff 50%,#6ff0a0)}
+.opt.correct .in{background:linear-gradient(180deg,#45e07f,#19c25a 55%,#0d8c3e);color:#02200c}
+.opt.correct .letter{color:#fff}
+.opt.flash .in{animation:flashIn .5s steps(1) 7 forwards}
+.opt.flash .hex{background:linear-gradient(90deg,#6ff0a0,#fff 50%,#6ff0a0)}
+@keyframes flashIn{0%{background:linear-gradient(180deg,#45e07f,#19c25a 55%,#0d8c3e);color:#02200c}50%{background:linear-gradient(180deg,#0e1f66,#050a2c);color:#f2f5ff}100%{background:linear-gradient(180deg,#45e07f,#19c25a 55%,#0d8c3e);color:#02200c}}
+.opt.wrong{filter:drop-shadow(0 0 16px rgba(255,40,60,1))}
+.opt.wrong .hex{background:linear-gradient(90deg,#ff8a95,#fff 50%,#ff8a95)}
+.opt.wrong .in{background:linear-gradient(180deg,#ff5b6b,#e3263a 55%,#a0101f);color:#fff}
+.opt.removed{cursor:default;opacity:.3;pointer-events:none}
+.opt.removed .txt,.opt.removed .letter{visibility:hidden}
+.actionBar{min-height:54px;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+#explain{margin:12px auto 0;max-width:860px;background:rgba(10,18,60,.85);border:1px solid rgba(255,207,74,.45);border-radius:12px;padding:10px 14px;font-size:15px;line-height:1.6;color:#e8ecff}
+#explain b{color:var(--gold)}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(2,3,18,.72);display:flex;align-items:center;justify-content:center;padding:16px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.card{width:min(560px,100%);max-height:92vh;overflow-y:auto;background:linear-gradient(180deg,#121a5c,#0a0c34);border:2px solid rgba(143,180,255,.6);border-radius:18px;padding:20px 20px 18px;box-shadow:0 0 40px rgba(90,120,255,.55);animation:pop .25s ease-out}
+.card.wide{width:min(760px,100%)}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.card h2{margin:0 0 12px;color:var(--gold);font-size:21px;letter-spacing:2px;text-align:center}
+.card p,.card li{line-height:1.7;font-size:15px}
+.card ul,.card ol{padding-left:22px;margin:6px 0}
+.card .btnRow{margin-top:14px}
+.card code,.card pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.card pre{background:#050824;border:1px solid rgba(143,180,255,.3);border-radius:8px;padding:10px;overflow-x:auto;white-space:pre;line-height:1.5;color:#cde3ff}
+.card code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px}
+textarea{width:100%;min-height:150px;background:#050824;color:var(--text);border:1px solid rgba(143,180,255,.45);border-radius:10px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;resize:vertical}
+details{background:rgba(255,255,255,.04);border:1px solid rgba(143,180,255,.25);border-radius:10px;padding:8px 12px;margin:10px 0}
+summary{cursor:pointer;color:var(--cyan);font-weight:700}
+#importMsg{font-size:14px;margin-top:8px;white-space:pre-wrap;line-height:1.5}
+#importMsg.ok{color:#7cf2a8} #importMsg.err{color:#ff9aa4}
+.chart{display:flex;justify-content:space-around;align-items:flex-end;height:230px;padding:10px 6px 0;border-bottom:2px solid rgba(143,180,255,.5);
+  background:repeating-linear-gradient(0deg,transparent 0 45px,rgba(143,180,255,.12) 45px 46px)}
+.barCol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.bar{width:56%;max-width:64px;height:0;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#9fd8ff,#3a6bff 60%,#2338b8);box-shadow:0 0 14px rgba(110,170,255,.7);transition:height 1.6s cubic-bezier(.2,.8,.2,1)}
+.barCol.gone .bar{background:rgba(255,255,255,.1);box-shadow:none}
+.pct{font-weight:800;font-size:17px;color:var(--gold);font-variant-numeric:tabular-nums}
+.barLabels{display:flex;justify-content:space-around;margin-top:6px}
+.barLabels span{flex:1;text-align:center;font-weight:800;font-size:18px;color:#cfe0ff}
+.friends{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.friend{background:rgba(20,32,100,.7);border:1px solid rgba(143,180,255,.5);border-radius:14px;padding:12px 6px;color:var(--text);text-align:center;transition:transform .15s,border-color .15s}
+.friend:hover{transform:translateY(-2px);border-color:var(--gold)}
+.friend .av{font-size:36px}
+.friend .fn{font-weight:800;margin-top:4px}
+.friend .fr{font-size:12px;color:var(--muted);margin-top:2px}
+.callHead{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.callHead .av{font-size:36px;width:60px;height:60px;flex:none;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);animation:ring 1s infinite}
+@keyframes ring{50%{box-shadow:0 0 0 8px rgba(25,194,90,.25)}}
+.callHead .info{flex:1}
+.callHead .st{font-size:13px;color:#7cf2a8}
+#callTimer{font-size:28px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.chat{display:flex;flex-direction:column;gap:8px;min-height:160px}
+.msg{max-width:88%;padding:8px 12px;border-radius:14px;font-size:15px;line-height:1.55}
+.msg.me{align-self:flex-end;background:#2a4bd6;border-bottom-right-radius:4px}
+.msg.fr{align-self:flex-start;background:#2b2f55;border-bottom-left-radius:4px}
+.msg .who{display:block;font-size:11px;opacity:.7;margin-bottom:2px}
+.endTitle{font-size:clamp(28px,7vw,46px);font-weight:900;margin:28px 0 4px;letter-spacing:3px}
+.endTitle.win{background:linear-gradient(180deg,#fff6c9,#ffcf4a 45%,#ff9d00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.endSub{color:#cfe0ff;font-size:17px;margin-bottom:8px;line-height:1.6;max-width:560px}
+.endAmt{font-size:clamp(40px,11vw,76px);font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(255,190,40,.7);font-variant-numeric:tabular-nums;margin:8px 0 18px}
+.endStats{font-size:14px;color:var(--muted);margin-bottom:22px}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;background:rgba(10,16,60,.95);border:1px solid var(--gold);color:var(--text);padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+@media (max-width:900px){
+  #ladder{position:fixed;right:0;top:0;bottom:0;width:min(280px,82vw);transform:translateX(105%)}
+  #ladder.open{transform:none}
+  #ladderClose{display:block;position:absolute;top:8px;right:8px}
+  #ladderToggle{display:inline-flex;align-items:center;gap:4px}
+  #ladderBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:19}
+}
+@media (max-width:640px){
+  #stage{padding:10px 12px 14px}
+  .topbar{gap:8px}
+  .timerWrap{order:1;width:100%;padding-bottom:4px}
+  #timer{margin-right:auto;width:46px;height:46px}
+  #timerNum{font-size:16px}
+  .lifelines{order:2;gap:7px;width:100%;justify-content:space-between}
+  .ll{width:22%;max-width:78px;height:38px;font-size:14px}
+  #walkBtn{font-size:13px;padding:0 10px}
+  .iconBtn{height:36px;font-size:14px}
+  .hostBar{margin-top:2px;gap:8px}
+  .hostAv{width:40px;height:40px;font-size:21px}
+  .hostBubble{font-size:14.5px;padding:7px 11px;min-height:66px}
+  .board{padding-top:12px}
+  .hexWrap::before{left:-12px;right:-12px}
+  #qPanel .hex{--cut:22px}
+  #qPanel .in{min-height:88px;padding:12px 28px;font-size:16.5px}
+  #qPanel .in.long{font-size:15px}
+  .answers{grid-template-columns:1fr;gap:9px;margin-top:12px}
+  .hex{--cut:18px}
+  .opt .in{min-height:48px;padding:7px 24px;font-size:15.5px}
+  .actionBar{margin-top:10px;min-height:48px}
+  .btn{padding:11px 18px;font-size:16px}
+  .friends{grid-template-columns:1fr}
+  .friend{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px}
+  .friend .av{font-size:30px}
+  .friend .fn{margin-top:0}
+  .chart{height:190px}
+}
+@media (prefers-reduced-motion:reduce){.beam,.logo,.logo::before{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="studio"><div class="dots"></div><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="beam b4"></div><div id="floor"></div></div>
+<div id="flashOverlay"></div>
+
+<!-- ===== 開始畫面 ===== -->
+<section id="startScreen" class="screen">
+  <div class="logo"><div class="t2">百萬獎金益智節目</div><div class="t1">百萬大挑戰</div><div class="t3">NT$1,000,000</div></div>
+  <div class="startPanel">
+    <div class="field"><label for="playerName">挑戰者</label><input id="playerName" maxlength="12" placeholder="輸入你的名字（選填）"></div>
+    <div class="field"><label for="timerMode">計時</label>
+      <select id="timerMode">
+        <option value="std">標準：1–5題30秒、6–10題45秒、11題起不限時</option>
+        <option value="30">每題 30 秒</option>
+        <option value="45">每題 45 秒</option>
+        <option value="60">每題 60 秒</option>
+        <option value="off">關閉計時</option>
+      </select></div>
+    <div class="field"><label for="soundOn">音效</label><input type="checkbox" id="soundOn" checked><span style="font-size:14px;color:var(--muted)">開啟音效</span></div>
+    <button class="btn big" id="startBtn">開始挑戰</button>
+    <div class="btnRow">
+      <button class="btn ghost" id="rulesBtn">遊戲規則</button>
+      <button class="btn ghost" id="importBtn">匯入題目</button>
+    </div>
+    <div class="poolInfo" id="poolInfo"></div>
+  </div>
+</section>
+
+<!-- ===== 遊戲畫面 ===== -->
+<section id="gameScreen" class="screen hidden">
+  <main id="stage">
+    <div class="topbar">
+      <div class="lifelines">
+        <button class="ll" id="ll5050" title="刪除 50:50">50:50<span class="lbl">刪除</span></button>
+        <button class="ll" id="llAud" title="現場觀眾求救">👥<span class="lbl">觀眾求救</span></button>
+        <button class="ll" id="llPhone" title="電話求救">📞<span class="lbl">電話求救</span></button>
+        <button class="ll" id="llSwitch" title="換題">🔄<span class="lbl">換題</span></button>
+      </div>
+      <div class="timerWrap">
+        <div id="timer"><svg viewBox="0 0 60 60"><circle class="bgc" cx="30" cy="30" r="26"/><circle class="fg" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0"/></svg><div id="timerNum">30</div></div>
+        <button class="iconBtn" id="walkBtn" title="放棄領獎">💰 放棄領獎</button>
+        <button class="iconBtn" id="ladderToggle" title="獎金表">🏆 <span id="ladderToggleAmt">NT$1,000</span></button>
+        <button class="iconBtn" id="muteBtn" title="音效開關">🔊</button>
+      </div>
+    </div>
+    <div class="hostBar">
+      <div class="hostAv">🎤</div>
+      <div class="hostBubble"><div class="hostName">主持人</div><div class="hostText" id="hostText"></div></div>
+    </div>
+    <div class="stageLogo"><div class="mini"><b>百萬大挑戰</b><span>NT$1,000,000</span></div></div>
+    <div class="board" id="board">
+      <div class="levelInfo" id="levelInfo"></div>
+      <div id="qPanel" class="hexWrap"><div class="hex"><div class="in" id="qText"></div></div></div>
+      <div class="answers" id="answers"></div>
+      <div id="explain" class="hidden"></div>
+      <div class="actionBar" id="actionBar"></div>
+    </div>
+  </main>
+  <div id="ladderBackdrop" class="hidden"></div>
+  <aside id="ladder">
+    <button class="iconBtn" id="ladderClose" title="關閉">✕</button>
+    <h3>🏆 獎金階梯</h3>
+    <ul id="ladderList"></ul>
+    <div class="ladderLegend">◆ 已通過的關卡<br><span style="color:#fff">白字＋「保底」</span>＝保底關卡：答錯時至少能帶走這個金額。</div>
+  </aside>
+</section>
+
+<!-- ===== 結束畫面 ===== -->
+<section id="endScreen" class="screen hidden">
+  <div class="logo" style="width:min(170px,40vw)"><div class="t1" style="font-size:clamp(22px,6vw,30px)">百萬大挑戰</div></div>
+  <div class="endTitle" id="endTitle"></div>
+  <div class="endSub" id="endSub"></div>
+  <div class="endAmt" id="endAmt"></div>
+  <div class="endStats" id="endStats"></div>
+  <div class="btnRow" style="width:min(420px,100%)">
+    <button class="btn" id="againBtn">再玩一次</button>
+    <button class="btn ghost" id="homeBtn">回首頁</button>
+  </div>
+</section>
+
+<!-- ===== 對話框 ===== -->
+<div class="modal hidden" id="rulesModal"><div class="card">
+  <h2>遊戲規則</h2>
+  <ol>
+    <li>共 <b>15 題</b>，每答對一題，獎金往上一階，最高 <b style="color:var(--gold)">NT$1,000,000</b>。</li>
+    <li>點選答案後，主持人會問「這是最終答案嗎？」，按「最終答案」才會鎖定。（電腦可用鍵盤 A／B／C／D 選答、Enter 確認）</li>
+    <li><b>保底關卡</b>：第 5 題（NT$10,000）與第 10 題（NT$100,000）。答錯時，獎金會掉回最近通過的保底金額（還沒過第 5 題就是 0 元）。</li>
+    <li>每題鎖定答案前，都可以按「<b>放棄領獎</b>」，帶著目前已贏得的獎金離開。</li>
+    <li>若有開啟計時，時間到視同答錯；使用求救時計時會暫停。</li>
+  </ol>
+  <p><b>求救機會（每種限用一次，用過會打叉）：</b></p>
+  <ul>
+    <li><b>50:50 刪除</b>：隨機刪去兩個錯誤答案。</li>
+    <li><b>👥 現場觀眾求救</b>：顯示觀眾投票百分比。題目越難，觀眾越不可靠！</li>
+    <li><b>📞 電話求救</b>：從中醫師、護理師、藥師三位朋友中選一位，通話 30 秒。朋友會說出猜測與把握程度，但不保證正確。</li>
+    <li><b>🔄 換題</b>：換成同一關的另一道備用題（題庫該關有備用題時才能用）。</li>
+  </ul>
+  <div class="btnRow"><button class="btn" data-close>我知道了</button></div>
+</div></div>
+
+<div class="modal hidden" id="importModal"><div class="card wide">
+  <h2>匯入題目</h2>
+  <p style="margin-top:0">把 JSON 或 CSV 內容貼在下面（或選擇檔案），再按「匯入並取代題庫」。題目會存在這台裝置的瀏覽器裡（localStorage），下次開啟仍會保留。</p>
+  <textarea id="importText" placeholder="貼上 JSON 陣列，或含標題列的 CSV（可直接從 Excel／Google 試算表複製）…"></textarea>
+  <div style="margin-top:8px"><input type="file" id="importFile" accept=".json,.csv,.txt,.tsv,application/json,text/csv" style="font-size:13px;color:var(--muted);max-width:100%"></div>
+  <div id="importMsg"></div>
+  <div class="btnRow">
+    <button class="btn" id="doImport">匯入並取代題庫</button>
+    <button class="btn ghost" id="restoreSample">恢復範例題</button>
+  </div>
+  <div class="btnRow" style="margin-top:8px">
+    <button class="btn ghost" id="exportJson" style="font-size:14px">下載目前題庫（JSON）</button>
+    <button class="btn ghost" id="exportCsv" style="font-size:14px">下載目前題庫（CSV）</button>
+  </div>
+  <details>
+    <summary>📖 題目格式說明</summary>
+    <ul>
+      <li><code>level</code>：關卡 1–15（1 最簡單，15 是百萬題）。也可改用 <code>difficulty</code>：<code>easy／medium／hard</code>（或 簡單／中等／困難），分別對應第 1–5、6–10、11–15 題。</li>
+      <li><code>question</code>：題目文字。</li>
+      <li><code>options</code>：四個選項 [A, B, C, D]（CSV 則用 A、B、C、D 四個欄位）。</li>
+      <li><code>answer</code>：正確答案，填 <code>A</code>～<code>D</code>（建議）；JSON 也可填數字 0～3（0＝A）。</li>
+      <li><code>explanation</code>：（選填）答題後顯示的解說。</li>
+    </ul>
+    <p>同一關放 2 題以上時，每局會隨機抽一題，其餘當作「換題」的備用題。某一關沒有題目時，會自動借用最接近關卡的題目。</p>
+    <p><b>JSON 範例：</b></p>
+<pre>[
+  {
+    "level": 1,
+    "question": "中醫「五臟」不包括下列哪一個？",
+    "options": ["心", "肝", "胃", "腎"],
+    "answer": "C",
+    "explanation": "五臟為心、肝、脾、肺、腎；胃屬六腑。"
+  },
+  { "difficulty": "hard", "question": "……", "options": ["…","…","…","…"], "answer": "A" }
+]</pre>
+    <p><b>CSV 範例</b>（第一列是標題；逗號或 Tab 分隔都可以；內容含逗號時請用雙引號包起來）：</p>
+<pre>level,question,A,B,C,D,answer,explanation
+1,中醫「五臟」不包括下列哪一個？,心,肝,胃,腎,C,胃屬六腑
+2,一年有幾個節氣？,12,24,36,48,B,
+15,"題目裡有逗號, 要加雙引號",選項1,選項2,選項3,選項4,D,解說</pre>
+    <p>標題也可以用中文：<code>關卡,題目,A,B,C,D,答案,解說</code></p>
+  </details>
+  <div class="btnRow"><button class="btn ghost" data-close>關閉</button></div>
+</div></div>
+
+<div class="modal hidden" id="confirmModal"><div class="card">
+  <h2 id="confirmTitle">確認</h2>
+  <p id="confirmText" style="text-align:center"></p>
+  <div class="btnRow"><button class="btn" id="confirmYes">確定</button><button class="btn ghost" id="confirmNo">取消</button></div>
+</div></div>
+
+<div class="modal hidden" id="audModal"><div class="card">
+  <h2>👥 現場觀眾投票</h2>
+  <div class="chart" id="chart"></div>
+  <div class="barLabels"><span>A</span><span>B</span><span>C</span><span>D</span></div>
+  <p id="audNote" style="text-align:center;color:var(--muted);font-size:14px;margin-bottom:0">觀眾正在投票中……</p>
+  <div class="btnRow"><button class="btn" data-close id="audClose">謝謝觀眾</button></div>
+</div></div>
+
+<div class="modal hidden" id="phoneModal"><div class="card">
+  <h2>📞 電話求救</h2>
+  <div id="phonePick">
+    <p style="text-align:center;margin-top:0">你要打給哪一位朋友？</p>
+    <div class="friends" id="friends"></div>
+    <div class="btnRow"><button class="btn ghost" data-close id="phoneCancel">取消（不使用）</button></div>
+  </div>
+  <div id="phoneCall" class="hidden">
+    <div class="callHead"><div class="av" id="callAv"></div><div class="info"><div id="callName" style="font-weight:800"></div><div class="st" id="callSt">通話中…</div></div><div id="callTimer">30</div></div>
+    <div class="chat" id="chat"></div>
+    <div class="btnRow"><button class="btn red" id="hangup">掛斷</button></div>
+  </div>
+</div></div>
+
+<canvas id="confetti"></canvas>
+<div id="toast"></div>
+<script>
+/* =====================================================================
+   ★★★ 題庫 QUESTIONS：請在這裡編輯題目（或用遊戲內「匯入題目」）★★★
+   ---------------------------------------------------------------------
+   每題欄位：
+     level       : 關卡 1–15（1 最簡單，15 為百萬題）
+                   （也可改用 difficulty: "easy" | "medium" | "hard"）
+     question    : 題目
+     options     : [A, B, C, D] 四個選項
+     answer      : 正確答案 "A"–"D"，或數字索引 0–3（0 = A）
+     explanation : （選填）答題後顯示的解說
+   同一關有多題時：每局隨機抽一題，其餘當「換題」備用題。
+   以下全部是【範例】題，正式題目請由 EJ 提供後替換。
+   ===================================================================== */
+const QUESTIONS = [
+  { level: 1,  question: "【範例】中醫所說的「五臟」不包括下列哪一個？", options: ["心", "肝", "胃", "腎"], answer: "C", explanation: "五臟為心、肝、脾、肺、腎；胃屬於六腑。" },
+  { level: 1,  question: "【範例】台灣最高的山是哪一座？", options: ["雪山", "玉山", "合歡山", "阿里山"], answer: "B", explanation: "玉山主峰海拔約 3,952 公尺，是台灣最高峰。" },
+  { level: 2,  question: "【範例】一年共有幾個節氣？", options: ["12 個", "24 個", "36 個", "48 個"], answer: "B", explanation: "二十四節氣，例如立春、清明、冬至。" },
+  { level: 2,  question: "【範例】下列哪一部不屬於中國古典「四大名著」？", options: ["西遊記", "水滸傳", "紅樓夢", "聊齋誌異"], answer: "D", explanation: "四大名著為三國演義、西遊記、水滸傳、紅樓夢。" },
+  { level: 3,  question: "【範例】中醫診斷「望、聞、問、切」中的「切」是指什麼？", options: ["切脈（把脈）", "切藥材", "切開皮膚", "切斷經絡"], answer: "A", explanation: "「切」指切脈、按診，也就是俗稱的把脈。" },
+  { level: 4,  question: "【範例】五行之中，「肝」對應的是哪一行？", options: ["木", "火", "土", "金"], answer: "A", explanation: "肝屬木、心屬火、脾屬土、肺屬金、腎屬水。" },
+  { level: 4,  question: "【範例】五行相生中，「木」生什麼？", options: ["土", "金", "火", "水"], answer: "C", explanation: "木生火、火生土、土生金、金生水、水生木。" },
+  { level: 5,  question: "【範例】《傷寒雜病論》的作者是誰？", options: ["孫思邈", "張仲景", "李時珍", "華佗"], answer: "B", explanation: "東漢張仲景著《傷寒雜病論》，被尊為「醫聖」。" },
+  { level: 5,  question: "【範例】「六淫」不包括下列哪一項？", options: ["風", "暑", "燥", "痰"], answer: "D", explanation: "六淫為風、寒、暑、濕、燥、火；痰屬於病理產物。" },
+  { level: 6,  question: "【範例】《本草綱目》的作者是哪一位醫家？", options: ["李時珍", "葉天士", "張景岳", "王清任"], answer: "A", explanation: "明代李時珍編著《本草綱目》。" },
+  { level: 7,  question: "【範例】被後世尊稱為「藥王」的是哪一位？", options: ["扁鵲", "孫思邈", "張仲景", "皇甫謐"], answer: "B", explanation: "唐代孫思邈著《千金要方》，被尊為「藥王」。" },
+  { level: 8,  question: "【範例】「足三里」穴屬於哪一條經脈？", options: ["足太陰脾經", "足少陽膽經", "足陽明胃經", "足太陽膀胱經"], answer: "C", explanation: "足三里為足陽明胃經的合穴。" },
+  { level: 9,  question: "【範例】十二時辰中的「子時」大約是幾點？", options: ["21:00–23:00", "23:00–01:00", "01:00–03:00", "03:00–05:00"], answer: "B", explanation: "子時為晚上 11 點到凌晨 1 點。" },
+  { level: 10, question: "【範例】中藥「四氣五味」的五味，不包括下列哪一個？", options: ["酸", "苦", "澀", "鹹"], answer: "C", explanation: "五味為酸、苦、甘、辛、鹹。" },
+  { level: 10, question: "【範例】方劑學中「君、臣、佐、使」是用來描述什麼？", options: ["醫師的官階", "方劑的配伍結構", "針灸的手法", "脈象的分類"], answer: "B", explanation: "君臣佐使說明方劑中各藥物的主從配伍關係。" },
+  { level: 11, question: "【範例】十二經脈中，與「手太陰肺經」互為表裡的是哪一條？", options: ["手陽明大腸經", "手少陰心經", "足太陰脾經", "手太陽小腸經"], answer: "A", explanation: "肺與大腸相表裡。" },
+  { level: 12, question: "【範例】依「子午流注」，丑時（01:00–03:00）氣血流注於哪一經？", options: ["膽經", "肝經", "肺經", "心經"], answer: "B", explanation: "子時膽經、丑時肝經、寅時肺經。" },
+  { level: 13, question: "【範例】依「十八反」，甘草反下列哪一味藥？", options: ["人參", "當歸", "甘遂", "黃耆"], answer: "C", explanation: "甘草反甘遂、大戟、海藻、芫花。" },
+  { level: 14, question: "【範例】「麻黃湯」最早出自哪一部典籍？", options: ["《黃帝內經》", "《傷寒論》", "《溫病條辨》", "《千金要方》"], answer: "B", explanation: "麻黃湯出自張仲景《傷寒論》。" },
+  { level: 14, question: "【範例】北宋「天聖針灸銅人」是由誰主持鑄造？", options: ["王惟一", "王叔和", "錢乙", "朱丹溪"], answer: "A", explanation: "北宋王惟一主持鑄造針灸銅人，並著《銅人腧穴針灸圖經》。" },
+  { level: 15, question: "【範例】《黃帝內經》由哪兩部分組成？", options: ["《素問》與《靈樞》", "《難經》與《脈經》", "《素問》與《難經》", "《靈樞》與《神農本草經》"], answer: "A", explanation: "《黃帝內經》分為《素問》與《靈樞》兩部分。" },
+  { level: 15, question: "【範例】「溫病四大家」不包括下列哪一位？", options: ["葉天士", "吳鞠通", "薛生白", "張仲景"], answer: "D", explanation: "溫病四大家一般指葉天士、薛生白、吳鞠通、王孟英。" }
+];
+/* ===================== 題庫結束 ===================== */
+
+const PRIZES = [1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 80000, 100000, 150000, 250000, 400000, 600000, 1000000];
+const SAFE_IDX = [4, 9]; // 第 5 題、第 10 題為保底
+const LETTERS = ["A", "B", "C", "D"];
+const LS_Q = "mc_questions_v1", LS_SET = "mc_settings_v1";
+const FRIENDS = [
+  { id: "tcm", av: "👨‍⚕️", name: "阿明", role: "中醫師朋友", hello: "喂？我剛看完門診。" },
+  { id: "nurse", av: "👩‍⚕️", name: "小美", role: "護理師朋友", hello: "喂～我在值班，快說！" },
+  { id: "pharm", av: "🧑‍🔬", name: "志豪", role: "藥師朋友", hello: "喂？我在藥局。" }
+];
+
+const $ = s => document.querySelector(s);
+const fmt = n => "NT$" + n.toLocaleString("en-US");
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2800); }
+
+/* ---------------- 題庫 / 匯入 ---------------- */
+let POOL = [], POOL_SRC = "sample";
+const tierOfLevel = l => l <= 5 ? 1 : l <= 10 ? 2 : 3;
+function parseDifficulty(d) {
+  if (d == null || d === "") return null;
+  const s = String(d).trim().toLowerCase();
+  if (["easy", "e", "簡單", "易", "初級", "低", "1"].includes(s)) return 1;
+  if (["medium", "mid", "m", "normal", "中等", "中", "中級", "2"].includes(s)) return 2;
+  if (["hard", "h", "困難", "難", "高級", "高", "3"].includes(s)) return 3;
+  return null;
+}
+function parseAnswer(a, options) {
+  if (a == null || a === "") return -1;
+  if (typeof a === "number") return Number.isInteger(a) && a >= 0 && a <= 3 ? a : -1;
+  const s = String(a).trim();
+  const full = { "Ａ": "A", "Ｂ": "B", "Ｃ": "C", "Ｄ": "D" };
+  let L = s.toUpperCase().replace(/[（(）)．.、:：\s]/g, ""); L = full[L] || L;
+  if (LETTERS.includes(L)) return LETTERS.indexOf(L);
+  return options.findIndex(o => o === s);
+}
+function normalize(list) {
+  const ok = [], errors = [];
+  if (!Array.isArray(list)) return { ok, errors: ["資料不是陣列（JSON 需以 [ 開頭）"] };
+  list.forEach((q, i) => {
+    const row = `第 ${i + 1} 題`;
+    if (!q || typeof q !== "object") { errors.push(`${row}：格式錯誤`); return; }
+    const question = String(q.question ?? q["題目"] ?? "").trim();
+    let options = q.options ?? q["選項"];
+    if (!Array.isArray(options)) options = [q.A ?? q.a, q.B ?? q.b, q.C ?? q.c, q.D ?? q.d];
+    options = options.map(o => (o == null ? "" : String(o).trim()));
+    if (!question) { errors.push(`${row}：缺少題目`); return; }
+    if (options.length !== 4 || options.some(o => !o)) { errors.push(`${row}：需要剛好 4 個非空白選項`); return; }
+    const answer = parseAnswer(q.answer ?? q["答案"], options);
+    if (answer < 0) { errors.push(`${row}：答案無法辨識（請填 A/B/C/D）`); return; }
+    let level = parseInt(q.level ?? q["關卡"], 10), tier, exact = true;
+    if (level >= 1 && level <= 15) tier = tierOfLevel(level);
+    else {
+      tier = parseDifficulty(q.difficulty ?? q["難度"]) || parseDifficulty(q.level ?? q["關卡"]);
+      if (!tier) { errors.push(`${row}：缺少 level（1–15）或 difficulty（easy/medium/hard）`); return; }
+      level = [3, 8, 13][tier - 1]; exact = false;
+    }
+    ok.push({ id: i, level, tier, exact, question, options, answer, explanation: String(q.explanation ?? q["解說"] ?? "").trim() });
+  });
+  return { ok, errors };
+}
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, "");
+  const delim = (text.split(/\r?\n/)[0] || "").includes("\t") ? "\t" : ",";
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"' && cur.trim() === "") { q = true; cur = ""; }
+    else if (c === delim) { row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+    else cur += c;
+  }
+  if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+  const clean = rows.filter(r => r.some(c => c.trim() !== ""));
+  if (!clean.length) return [];
+  const aliases = {
+    level: ["level", "關卡", "等級", "題號", "lv"], difficulty: ["difficulty", "難度"], question: ["question", "題目", "問題"],
+    A: ["a", "選項a", "option a", "optiona"], B: ["b", "選項b", "option b", "optionb"], C: ["c", "選項c", "option c", "optionc"], D: ["d", "選項d", "option d", "optiond"],
+    answer: ["answer", "答案", "正確答案"], explanation: ["explanation", "解說", "說明", "解析"]
+  };
+  const head = clean[0].map(h => h.trim().toLowerCase()), map = {};
+  for (const k in aliases) { const idx = head.findIndex(h => aliases[k].includes(h)); if (idx >= 0) map[k] = idx; }
+  let body = clean;
+  if (map.question != null) body = clean.slice(1);
+  else Object.assign(map, { level: 0, question: 1, A: 2, B: 3, C: 4, D: 5, answer: 6, explanation: 7 });
+  return body.map(r => {
+    const g = k => map[k] != null ? (r[map[k]] ?? "").trim() : undefined;
+    return { level: g("level"), difficulty: g("difficulty"), question: g("question"), options: [g("A"), g("B"), g("C"), g("D")], answer: g("answer"), explanation: g("explanation") };
+  });
+}
+function parseImport(text) {
+  const t = text.trim().replace(/^\uFEFF/, "");
+  if (!t) return { ok: [], errors: ["內容是空的"] };
+  if (t[0] === "[" || t[0] === "{") {
+    try { let data = JSON.parse(t); if (!Array.isArray(data) && Array.isArray(data.questions)) data = data.questions; return normalize(data); }
+    catch (e) { return { ok: [], errors: ["JSON 格式錯誤：" + e.message] }; }
+  }
+  return normalize(parseCSV(t));
+}
+function loadPool() {
+  try { const raw = localStorage.getItem(LS_Q); if (raw) { const r = normalize(JSON.parse(raw)); if (r.ok.length) { POOL = r.ok; POOL_SRC = "custom"; return; } } } catch (e) {}
+  POOL = normalize(QUESTIONS).ok; POOL_SRC = "sample";
+}
+const plainQ = (q, ansAsLetter) => ({ level: q.exact ? q.level : undefined, difficulty: q.exact ? undefined : ["easy", "medium", "hard"][q.tier - 1], question: q.question, options: q.options, answer: ansAsLetter ? LETTERS[q.answer] : q.answer, explanation: q.explanation || undefined });
+function coverageNote() {
+  const missing = []; for (let l = 1; l <= 15; l++) if (!POOL.some(q => q.exact ? q.level === l : q.tier === tierOfLevel(l))) missing.push(l);
+  return missing.length ? `（第 ${missing.join("、")} 關沒有題目，會借用相近關卡的題目）` : "";
+}
+function updatePoolInfo() { $("#poolInfo").innerHTML = `目前題庫：<b>${POOL_SRC === "sample" ? "範例題" : "自訂題目"}</b>，共 ${POOL.length} 題<br>${coverageNote()}`; }
+
+/* ---------------- 設定 ---------------- */
+const settings = Object.assign({ name: "", timer: "std", sound: true }, (() => { try { return JSON.parse(localStorage.getItem(LS_SET)) || {}; } catch (e) { return {}; } })());
+function saveSettings() { try { localStorage.setItem(LS_SET, JSON.stringify(settings)); } catch (e) {} }
+
+/* ---------------- 音效（Web Audio 即時合成，無音檔） ---------------- */
+const Snd = {
+  ctx: null, master: null, drone: null,
+  init() {
+    try {
+      if (this.ctx) { if (this.ctx.state === "suspended") this.ctx.resume(); return; }
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = new AC(); this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
+    } catch (e) { this.ctx = null; }
+  },
+  tone(freq, dur, { type = "sine", vol = 0.3, when = 0, attack = 0.01, slideTo = null } = {}) {
+    if (!settings.sound || !this.ctx) return;
+    const t = this.ctx.currentTime + when, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + 0.05);
+  },
+  chord(fs, dur, opts = {}) { fs.forEach(f => this.tone(f, dur, opts)); },
+  click() { this.tone(880, 0.08, { type: "triangle", vol: 0.15 }); },
+  select() { this.tone(523, 0.12, { type: "triangle", vol: 0.2 }); this.tone(784, 0.18, { type: "triangle", vol: 0.15, when: 0.06 }); },
+  start() { [196, 247, 294, 392].forEach((f, i) => this.tone(f, 1.6, { type: "sawtooth", vol: 0.07, when: i * 0.12, attack: 0.1 })); this.chord([392, 494, 587, 784], 1.8, { type: "triangle", vol: 0.12, when: 0.5, attack: 0.05 }); },
+  question() { this.tone(110, 1.2, { type: "sawtooth", vol: 0.08, attack: 0.3 }); this.chord([330, 415], 0.9, { type: "triangle", vol: 0.08, when: 0.1, attack: 0.2 }); },
+  lock(sec) {
+    if (!settings.sound || !this.ctx) return;
+    this.stopDrone();
+    const c = this.ctx, t = c.currentTime, g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + sec * 0.8);
+    const o1 = c.createOscillator(), o2 = c.createOscillator(); o1.type = o2.type = "sawtooth";
+    o1.frequency.setValueAtTime(73, t); o1.frequency.linearRampToValueAtTime(98, t + sec); o2.frequency.setValueAtTime(73.8, t); o2.frequency.linearRampToValueAtTime(99, t + sec);
+    const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(300, t); f.frequency.linearRampToValueAtTime(1400, t + sec);
+    o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.master); o1.start(t); o2.start(t); o1.stop(t + sec + 3); o2.stop(t + sec + 3);
+    this.drone = { o1, o2, g };
+    for (let i = 0; i < sec / 0.75; i++) { this.tone(55, 0.18, { vol: 0.5, when: i * 0.75 }); this.tone(50, 0.16, { vol: 0.35, when: i * 0.75 + 0.2 }); }
+  },
+  stopDrone() {
+    if (!this.drone || !this.ctx) return; const t = this.ctx.currentTime, d = this.drone; this.drone = null;
+    try { d.g.gain.cancelScheduledValues(t); d.g.gain.setValueAtTime(Math.max(d.g.gain.value, 0.0001), t); d.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15); d.o1.stop(t + 0.2); d.o2.stop(t + 0.2); } catch (e) {}
+  },
+  correct() { this.stopDrone(); [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.5, { type: "triangle", vol: 0.25, when: i * 0.09 })); this.chord([523, 659, 784, 1047], 1.4, { vol: 0.12, when: 0.36 }); },
+  wrong() { this.stopDrone(); this.tone(220, 1.1, { type: "sawtooth", vol: 0.2, slideTo: 90 }); this.tone(233, 1.1, { type: "sawtooth", vol: 0.15, slideTo: 95 }); this.tone(60, 1.2, { vol: 0.4 }); },
+  tick(urgent) { this.tone(urgent ? 1500 : 1100, 0.05, { type: "square", vol: urgent ? 0.12 : 0.05 }); },
+  lifeline() { this.tone(300, 0.5, { vol: 0.2, slideTo: 1200 }); this.tone(600, 0.3, { type: "triangle", vol: 0.1, when: 0.35 }); },
+  fifty() { this.tone(900, 0.25, { type: "square", vol: 0.08, slideTo: 200 }); this.tone(900, 0.25, { type: "square", vol: 0.08, slideTo: 200, when: 0.25 }); },
+  ring() { for (let i = 0; i < 2; i++) this.chord([440, 480], 0.4, { vol: 0.12, when: i * 0.6 }); },
+  hang() { this.chord([480, 620], 0.2, { type: "square", vol: 0.06 }); },
+  win() { [523, 523, 523, 659, 784, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.35, { type: "triangle", vol: 0.25, when: i * 0.15 })); this.chord([523, 659, 784, 1047, 1319], 2.5, { type: "sawtooth", vol: 0.05, when: 1.2, attack: 0.05 }); this.chord([523, 659, 784, 1047], 2.5, { type: "triangle", vol: 0.15, when: 1.2 }); },
+  walk() { [784, 659, 523].forEach((f, i) => this.tone(f, 0.45, { type: "triangle", vol: 0.2, when: i * 0.18 })); }
+};
+
+/* ---------------- 遊戲狀態 ---------------- */
+const S = { name: "", level: 0, q: null, used: {}, usedIds: new Set(), removed: [], sel: -1, phase: "idle", timeLeft: 0, timeTotal: 0, timerId: null, timers: [], paused: false };
+function later(fn, ms) { const id = setTimeout(fn, ms); S.timers.push(id); return id; }
+function clearLater() { S.timers.forEach(clearTimeout); S.timers = []; }
+const won = () => S.level > 0 ? PRIZES[S.level - 1] : 0;
+const safeWon = () => S.level > 9 ? PRIZES[9] : S.level > 4 ? PRIZES[4] : 0;
+const pname = () => S.name || "挑戰者";
+const matchesLevel = (q, L) => q.exact ? q.level === L : q.tier === tierOfLevel(L);
+
+function candidates(L, excludeId) {
+  const avail = POOL.filter(q => !S.usedIds.has(q.id) && q.id !== excludeId);
+  let c = avail.filter(q => q.exact && q.level === L);
+  if (!c.length) c = avail.filter(q => !q.exact && q.tier === tierOfLevel(L));
+  if (!c.length && avail.length) { let best = Infinity; avail.forEach(q => best = Math.min(best, Math.abs(q.level - L))); c = avail.filter(q => Math.abs(q.level - L) === best); }
+  return c;
+}
+function spareList() { const L = S.level + 1; return POOL.filter(q => !S.usedIds.has(q.id) && q.id !== S.q.id && matchesLevel(q, L)); }
+function pickQuestion(L) {
+  let c = candidates(L);
+  if (!c.length) { S.usedIds.clear(); c = candidates(L); }
+  const q = pick(c.length ? c : POOL); S.usedIds.add(q.id); return q;
+}
+
+/* ---------------- 主持人 ---------------- */
+let hostTyping = null;
+function host(text, speed = 28) {
+  const el = $("#hostText"); clearInterval(hostTyping); el.textContent = ""; el.classList.add("typing");
+  const chars = Array.from(text); let i = 0;
+  hostTyping = setInterval(() => { el.textContent += chars[i++] ?? ""; if (i >= chars.length) { clearInterval(hostTyping); el.classList.remove("typing"); } }, speed);
+}
+
+/* ---------------- 獎金階梯 ---------------- */
+function renderLadder() {
+  const ul = $("#ladderList"); ul.innerHTML = "";
+  for (let i = 14; i >= 0; i--) {
+    const li = document.createElement("li");
+    li.className = [SAFE_IDX.includes(i) && "safe", i === S.level && S.phase !== "idle" && "current", i < S.level && "passed", i === 14 && "top"].filter(Boolean).join(" ");
+    li.innerHTML = `<span class="n">${i + 1}</span><span class="dia">◆</span><span>${fmt(PRIZES[i])}</span>${SAFE_IDX.includes(i) ? '<span class="tag">保底</span>' : ""}`;
+    ul.appendChild(li);
+  }
+  $("#ladderToggleAmt").textContent = fmt(PRIZES[Math.min(S.level, 14)]);
+}
+function openLadder(o) { $("#ladder").classList.toggle("open", o); $("#ladderBackdrop").classList.toggle("hidden", !o); }
+
+/* ---------------- 計時器 ---------------- */
+function timeFor(idx) {
+  const m = settings.timer;
+  if (m === "off") return 0;
+  if (m === "std") return idx < 5 ? 30 : idx < 10 ? 45 : 0;
+  return parseInt(m, 10) || 0;
+}
+function drawTimer() {
+  const el = $("#timer"), fg = el.querySelector(".fg"), C = 163.36;
+  if (!S.timeTotal) { el.classList.add("off"); el.classList.remove("warn"); $("#timerNum").textContent = "∞"; fg.style.strokeDashoffset = 0; return; }
+  el.classList.remove("off"); $("#timerNum").textContent = S.timeLeft;
+  fg.style.strokeDashoffset = C * (1 - S.timeLeft / S.timeTotal);
+  el.classList.toggle("warn", S.timeLeft <= 10);
+}
+function startTimer() {
+  stopTimer(); S.timeTotal = timeFor(S.level); S.timeLeft = S.timeTotal; S.paused = false; drawTimer();
+  if (!S.timeTotal) return;
+  S.timerId = setInterval(() => {
+    if (S.paused) return;
+    S.timeLeft--; drawTimer();
+    if (S.timeLeft <= 10 && S.timeLeft > 0) Snd.tick(S.timeLeft <= 5);
+    if (S.timeLeft <= 0) { stopTimer(); onTimeout(); }
+  }, 1000);
+}
+function stopTimer() { clearInterval(S.timerId); S.timerId = null; }
+
+/* ---------------- 題目顯示 ---------------- */
+function renderQuestion() {
+  const q = S.q, n = S.level + 1;
+  $("#levelInfo").innerHTML = `第 <b>${n}</b> 題 ／ 獎金 <b>${fmt(PRIZES[S.level])}</b>${SAFE_IDX.includes(S.level) ? "　🛡️ 保底關卡" : ""}`;
+  const qt = $("#qText"); qt.textContent = q.question; qt.classList.toggle("long", Array.from(q.question).length > 40);
+  const box = $("#answers"); box.innerHTML = "";
+  q.options.forEach((o, i) => {
+    const d = document.createElement("div"); d.className = "opt hexWrap"; d.dataset.i = i; d.setAttribute("role", "button");
+    d.innerHTML = `<div class="hex"><div class="in"><span class="letter">◆ ${LETTERS[i]}:</span><span class="txt"></span></div></div>`;
+    d.querySelector(".txt").textContent = o;
+    d.addEventListener("click", () => chooseOption(i));
+    box.appendChild(d);
+  });
+  $("#explain").classList.add("hidden"); $("#actionBar").innerHTML = "";
+  S.removed = []; S.sel = -1;
+}
+const optEl = i => $("#answers").children[i];
+function updateControls() {
+  const ans = S.phase === "answering";
+  [["fifty", "#ll5050"], ["aud", "#llAud"], ["phone", "#llPhone"], ["switch", "#llSwitch"]].forEach(([k, sel]) => {
+    const b = $(sel); b.classList.toggle("used", !!S.used[k]); b.disabled = !!S.used[k] || !ans;
+  });
+  const sw = $("#llSwitch"), noSpare = !S.used.switch && S.q && !spareList().length;
+  sw.classList.toggle("nospare", !!noSpare); sw.title = noSpare ? "換題（本關沒有備用題）" : "換題";
+  $("#walkBtn").disabled = !(ans || S.phase === "confirm");
+}
+function mkBtn(text, cls, fn, id) { const b = document.createElement("button"); b.className = cls; b.textContent = text; b.addEventListener("click", fn); if (id) b.id = id; return b; }
+
+function nextQuestion(first) {
+  clearLater(); $("#studio").classList.remove("tense");
+  S.q = pickQuestion(S.level + 1); S.phase = "answering";
+  renderQuestion(); renderLadder(); updateControls(); startTimer(); Snd.question();
+  const n = S.level + 1, p = fmt(PRIZES[S.level]);
+  let line;
+  if (first) line = `歡迎來到《百萬大挑戰》！今晚的挑戰者是——${pname()}！第 1 題，獎金 ${p}，請看題目。`;
+  else if (S.level === 14) line = `${pname()}，這就是最後一題——百萬大題！答對，你就贏得 ${fmt(1000000)}！`;
+  else if (SAFE_IDX.includes(S.level)) line = `第 ${n} 題，獎金 ${p}。這是保底關卡！答對了，之後就算答錯也能帶走 ${p}。`;
+  else line = pick([`第 ${n} 題，獎金 ${p}。請看題目。`, `好，我們來到第 ${n} 題，價值 ${p}。`, `${pname()}，第 ${n} 題，${p}，準備好了嗎？`]);
+  host(line);
+}
+
+/* ---------------- 作答流程 ---------------- */
+function chooseOption(i) {
+  if (!(S.phase === "answering" || S.phase === "confirm") || S.removed.includes(i)) return;
+  Snd.init(); Snd.select();
+  if (S.sel >= 0) optEl(S.sel).classList.remove("selected");
+  S.sel = i; optEl(i).classList.add("selected"); S.phase = "confirm"; updateControls();
+  host(pick([`你確定嗎？這是最終答案嗎？`, `${pname()}，你選 ${LETTERS[i]}……這是你的最終答案嗎？`, `${LETTERS[i]}，「${S.q.options[i]}」。你確定嗎？這是最終答案嗎？`]));
+  const bar = $("#actionBar"); bar.innerHTML = "";
+  bar.append(mkBtn("最終答案！", "btn", finalAnswer, "finalBtn"), mkBtn("再想想", "btn ghost", cancelSelection, "cancelBtn"));
+}
+function cancelSelection() {
+  if (S.phase !== "confirm") return; Snd.click();
+  optEl(S.sel).classList.remove("selected"); S.sel = -1; S.phase = "answering"; $("#actionBar").innerHTML = ""; updateControls();
+  host(pick(["慢慢來，不要急。", "好，再仔細想一想。", "沒關係，想清楚再回答。"]));
+}
+function finalAnswer() {
+  if (S.phase !== "confirm") return;
+  S.phase = "reveal"; stopTimer(); updateControls(); $("#actionBar").innerHTML = "";
+  const i = S.sel, el = optEl(i); el.classList.remove("selected"); el.classList.add("locked");
+  $("#studio").classList.add("tense");
+  const wait = 1800 + S.level * 170;
+  Snd.lock(wait / 1000);
+  host(pick([`好，鎖定 ${LETTERS[i]}。`, `${LETTERS[i]}，最終答案。我們來看看……`, `鎖定 ${LETTERS[i]}！正確答案是……`]), 40);
+  later(() => reveal(i), wait);
+}
+function reveal(i) {
+  $("#studio").classList.remove("tense");
+  const ok = i === S.q.answer, el = optEl(i);
+  el.classList.remove("locked"); showExplain();
+  if (ok) {
+    el.classList.add("correct"); Snd.correct(); flash("g");
+    S.level++;
+    if (S.level === 15) { S.phase = "done"; renderLadder(); updateControls(); host(`答對了！！！${pname()}，你贏得了一百萬！！！`); later(() => endGame("win"), 2200); return; }
+    S.phase = "between"; renderLadder(); updateControls();
+    const amt = fmt(won());
+    host(SAFE_IDX.includes(S.level - 1) ? `答對了！恭喜你通過保底關卡，${amt} 已經穩穩入袋！` : pick([`答對了！你現在有 ${amt}！`, `正確答案！恭喜贏得 ${amt}！`, `漂亮！${amt} 到手！`]));
+    $("#actionBar").append(mkBtn("下一題 ▶", "btn", () => { Snd.click(); nextQuestion(false); }, "nextBtn"));
+  } else {
+    el.classList.add("wrong"); Snd.wrong(); flash("r");
+    optEl(S.q.answer).classList.add("flash");
+    S.phase = "done"; updateControls();
+    host(`很可惜……正確答案是 ${LETTERS[S.q.answer]}「${S.q.options[S.q.answer]}」。${safeWon() ? `你將帶著保底獎金 ${fmt(safeWon())} 離開。` : ""}`);
+    $("#actionBar").append(mkBtn("查看結果", "btn", () => endGame("lose"), "resultBtn"));
+  }
+}
+function onTimeout() {
+  if (!(S.phase === "answering" || S.phase === "confirm")) return;
+  closeAllModals();
+  S.phase = "done"; updateControls(); $("#actionBar").innerHTML = "";
+  if (S.sel >= 0) optEl(S.sel).classList.remove("selected");
+  Snd.wrong(); flash("r"); optEl(S.q.answer).classList.add("flash"); showExplain();
+  host(`時間到！正確答案是 ${LETTERS[S.q.answer]}「${S.q.options[S.q.answer]}」。`);
+  $("#actionBar").append(mkBtn("查看結果", "btn", () => endGame("timeout"), "resultBtn"));
+}
+function showExplain() {
+  const ex = $("#explain"), q = S.q;
+  ex.innerHTML = `<b>正確答案：${LETTERS[q.answer]}「<span></span>」</b>${q.explanation ? "<br>💡 <span></span>" : ""}`;
+  const sp = ex.querySelectorAll("span"); sp[0].textContent = q.options[q.answer]; if (sp[1]) sp[1].textContent = q.explanation;
+  ex.classList.remove("hidden");
+}
+function flash(c) { const f = $("#flashOverlay"); f.className = c; setTimeout(() => f.className = "", 700); }
+
+/* ---------------- 放棄領獎 ---------------- */
+function walkAway() {
+  if (!(S.phase === "answering" || S.phase === "confirm")) return;
+  Snd.init(); Snd.click(); S.paused = true;
+  confirmBox("放棄領獎", `確定要放棄這一題，帶著 ${fmt(won())} 離開嗎？`, () => {
+    stopTimer(); S.phase = "done"; updateControls(); $("#actionBar").innerHTML = "";
+    if (S.sel >= 0) optEl(S.sel).classList.remove("selected");
+    Snd.walk(); optEl(S.q.answer).classList.add("flash"); showExplain();
+    host(`${pname()} 決定見好就收，帶走 ${fmt(won())}！順便告訴你，正確答案是 ${LETTERS[S.q.answer]}。`);
+    $("#actionBar").append(mkBtn("領取獎金", "btn", () => endGame("walk"), "resultBtn"));
+  }, () => { S.paused = false; });
+}
+
+/* ---------------- 求救 ---------------- */
+function lifelineReady(k) { if (S.used[k] || S.phase !== "answering") return false; Snd.init(); return true; }
+function useFifty() {
+  if (!lifelineReady("fifty")) return;
+  S.used.fifty = true; Snd.fifty();
+  S.removed = shuffle([0, 1, 2, 3].filter(i => i !== S.q.answer)).slice(0, 2);
+  S.removed.forEach(i => optEl(i).classList.add("removed"));
+  host("好，電腦，請拿掉兩個錯誤答案！剩下的兩個，其中一個是正確答案。");
+  updateControls();
+}
+function audienceVotes() {
+  const remain = [0, 1, 2, 3].filter(i => !S.removed.includes(i)), ans = S.q.answer, lv = S.level;
+  let rel = lv < 5 ? rnd(0.55, 0.85) : lv < 10 ? rnd(0.38, 0.62) : rnd(0.22, 0.45);
+  if (remain.length === 2) rel = Math.max(rel, lv < 10 ? 0.62 : 0.5);
+  const mislead = lv < 5 ? 0.03 : lv < 10 ? 0.12 : 0.28;
+  let top = ans; if (Math.random() < mislead) top = pick(remain.filter(i => i !== ans));
+  const v = [0, 0, 0, 0]; v[top] = rel; if (top !== ans) v[ans] = rel * rnd(0.55, 0.9);
+  const rest = remain.filter(i => v[i] === 0), left = Math.max(0, 1 - v.reduce((a, b) => a + b, 0));
+  const w = rest.map(() => rnd(0.3, 1)), ws = w.reduce((a, b) => a + b, 0) || 1;
+  rest.forEach((i, k) => v[i] = left * w[k] / ws);
+  const tot = v.reduce((a, b) => a + b, 0), pct = v.map(x => Math.round(x / tot * 100));
+  pct[top] += 100 - pct.reduce((a, b) => a + b, 0);
+  return pct;
+}
+function useAudience() {
+  if (!lifelineReady("aud")) return;
+  S.used.aud = true; updateControls(); S.paused = true; Snd.lifeline();
+  host("我們來問問現場觀眾！請拿起手上的投票器……");
+  const pct = audienceVotes(), chart = $("#chart"); chart.innerHTML = "";
+  pct.forEach((p, i) => { const c = document.createElement("div"); c.className = "barCol" + (S.removed.includes(i) ? " gone" : ""); c.innerHTML = `<div class="pct">…</div><div class="bar"></div>`; c.dataset.p = p; chart.appendChild(c); });
+  $("#audNote").textContent = "觀眾正在投票中……"; $("#audClose").disabled = true;
+  openModal("#audModal");
+  for (let k = 0; k < 6; k++) setTimeout(() => Snd.tone(600 + Math.random() * 600, 0.08, { type: "square", vol: 0.05 }), k * 180);
+  setTimeout(() => {
+    [...chart.children].forEach(c => { const p = +c.dataset.p; c.querySelector(".bar").style.height = Math.max(p, 1) * 0.85 + "%"; c.querySelector(".pct").textContent = p + "%"; });
+    $("#audNote").textContent = S.level >= 10 ? "提醒：題目越難，觀眾越可能猜錯喔！" : "投票結果出爐！";
+    $("#audClose").disabled = false; Snd.chord([660, 880], 0.4, { type: "triangle", vol: 0.12 });
+    host("觀眾的投票結果出來了，你參考看看。");
+  }, 1200);
+}
+function useSwitch() {
+  if (S.used.switch || S.phase !== "answering") return;
+  Snd.init();
+  const spares = spareList();
+  if (!spares.length) { toast("這一關沒有備用題，無法換題（同一關多放幾題即可使用）"); return; }
+  S.used.switch = true; Snd.lifeline();
+  S.q = pick(spares); S.usedIds.add(S.q.id);
+  renderQuestion(); updateControls(); startTimer();
+  host("沒問題，幫你換一題！同樣的獎金，新的題目。");
+}
+
+let callTimerId = null;
+function usePhone() {
+  if (!lifelineReady("phone")) return;
+  S.paused = true; Snd.lifeline();
+  const fr = $("#friends"); fr.innerHTML = "";
+  FRIENDS.forEach(f => {
+    const b = document.createElement("button"); b.className = "friend"; b.dataset.id = f.id;
+    b.innerHTML = `<div class="av">${f.av}</div><div><div class="fn">${f.name}</div><div class="fr">${f.role}</div></div>`;
+    b.addEventListener("click", () => startCall(f)); fr.appendChild(b);
+  });
+  $("#phonePick").classList.remove("hidden"); $("#phoneCall").classList.add("hidden");
+  host("電話求救！你想打給哪一位朋友？");
+  openModal("#phoneModal");
+}
+function friendGuess() {
+  const remain = [0, 1, 2, 3].filter(i => !S.removed.includes(i)), ans = S.q.answer, lv = S.level;
+  const pRight = lv < 5 ? 0.93 : lv < 10 ? 0.78 : 0.58, pDunno = lv < 5 ? 0 : lv < 10 ? 0.05 : 0.15;
+  if (Math.random() < pDunno) return { idx: -1, conf: 0 };
+  const right = Math.random() < pRight, idx = right ? ans : pick(remain.filter(i => i !== ans));
+  const conf = right ? (lv < 5 ? rnd(80, 99) : lv < 10 ? rnd(60, 95) : rnd(40, 85)) : (lv < 10 ? rnd(45, 75) : rnd(30, 70));
+  return { idx, conf: Math.min(95, Math.round(conf / 5) * 5) };
+}
+let callGen = 0;
+function startCall(f) {
+  S.used.phone = true; updateControls();
+  $("#phonePick").classList.add("hidden"); $("#phoneCall").classList.remove("hidden");
+  $("#callAv").textContent = f.av; $("#callName").textContent = `${f.name}（${f.role}）`; $("#callSt").textContent = "撥號中…";
+  const chat = $("#chat"); chat.innerHTML = ""; Snd.ring();
+  let left = 30; $("#callTimer").textContent = left; clearInterval(callTimerId);
+  const q = S.q, g = friendGuess(), remain = [0, 1, 2, 3].filter(i => !S.removed.includes(i));
+  const optsText = remain.map(i => `${LETTERS[i]}「${q.options[i]}」`).join("、");
+  let answerLine;
+  if (g.idx < 0) answerLine = pick(["唉……這題我真的不知道，抱歉，你只能靠自己了！", "這題超出我的範圍了……我不敢亂講，你自己判斷吧！"]);
+  else if (g.conf >= 85) answerLine = `這題我很確定，是 ${LETTERS[g.idx]}「${q.options[g.idx]}」！大概有 ${g.conf}% 把握。`;
+  else if (g.conf >= 60) answerLine = `我覺得應該是 ${LETTERS[g.idx]}「${q.options[g.idx]}」，大概 ${g.conf}% 把握吧。`;
+  else answerLine = `嗯……我不太確定耶。硬要猜的話是 ${LETTERS[g.idx]}，只有 ${g.conf}% 把握，你自己要判斷喔！`;
+  const lines = [
+    { who: "fr", text: f.hello },
+    { who: "me", text: `${f.name}！我是${S.name || "我"}，我在《百萬大挑戰》第 ${S.level + 1} 題，${fmt(PRIZES[S.level])}！題目是：「${q.question.replace(/^【範例】/, "")}」選項有 ${optsText}。` },
+    { who: "fr", text: pick(["嗯……讓我想一下……", "等等，我想想……", "哇，這題……我想一下。"]) },
+    { who: "fr", text: answerLine }
+  ];
+  const gen = ++callGen;
+  setTimeout(() => {
+    if (gen !== callGen) return;
+    $("#callSt").textContent = "通話中…";
+    callTimerId = setInterval(() => { left--; $("#callTimer").textContent = left; if (left <= 5 && left > 0) Snd.tick(true); if (left <= 0) endCall("time"); }, 1000);
+    typeLines(chat, lines, f, gen, 0);
+  }, 1300);
+}
+function typeLines(chat, lines, f, gen, k) {
+  if (gen !== callGen || k >= lines.length) { if (gen === callGen && k >= lines.length) $("#callSt").textContent = "朋友說完了，可以掛斷了"; return; }
+  const L = lines[k], m = document.createElement("div"); m.className = "msg " + L.who;
+  m.innerHTML = `<span class="who"></span><span class="t"></span>`; m.querySelector(".who").textContent = L.who === "me" ? (S.name || "我") : f.name; chat.appendChild(m);
+  const t = m.querySelector(".t"), chars = Array.from(L.text); let i = 0;
+  const id = setInterval(() => {
+    if (gen !== callGen) { clearInterval(id); return; }
+    t.textContent += chars[i++] ?? ""; if (i % 3 === 0) Snd.tone(1200 + Math.random() * 300, 0.02, { type: "square", vol: 0.02 });
+    const card = m.closest(".card"); if (card) card.scrollTop = card.scrollHeight;
+    if (i >= chars.length) { clearInterval(id); setTimeout(() => typeLines(chat, lines, f, gen, k + 1), 600); }
+  }, L.who === "me" ? 20 : 42);
+}
+function endCall(reason) {
+  if ($("#phoneModal").classList.contains("hidden")) return;
+  clearInterval(callTimerId); callGen++;
+  Snd.hang(); $("#callSt").textContent = reason === "time" ? "時間到，通話結束" : "通話結束";
+  setTimeout(() => closeModal("#phoneModal"), reason === "time" ? 900 : 200);
+  host(reason === "time" ? "30 秒到！電話時間結束。你的決定是？" : "好，電話掛斷了。你的決定是？");
+}
+
+/* ---------------- 對話框 ---------------- */
+const modalClose = {};
+function openModal(sel, onClose) { $(sel).classList.remove("hidden"); modalClose[sel] = onClose; }
+function closeModal(sel) {
+  const m = $(sel); if (m.classList.contains("hidden")) return; m.classList.add("hidden");
+  if (sel === "#phoneModal") { clearInterval(callTimerId); callGen++; }
+  if (sel === "#audModal" || sel === "#phoneModal") S.paused = false;
+  const cb = modalClose[sel]; delete modalClose[sel]; if (cb) cb();
+}
+function closeAllModals() { ["#audModal", "#phoneModal", "#confirmModal"].forEach(closeModal); }
+document.querySelectorAll(".modal").forEach(m => {
+  m.addEventListener("click", e => { if (e.target === m && !["phoneModal", "audModal"].includes(m.id)) closeModal("#" + m.id); });
+  m.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => { Snd.click(); closeModal("#" + m.id); }));
+});
+function confirmBox(title, text, yes, no) {
+  $("#confirmTitle").textContent = title; $("#confirmText").textContent = text;
+  let decided = false;
+  $("#confirmYes").onclick = () => { decided = true; closeModal("#confirmModal"); yes && yes(); };
+  $("#confirmNo").onclick = () => closeModal("#confirmModal");
+  openModal("#confirmModal", () => { if (!decided && no) no(); });
+}
+
+/* ---------------- 畫面切換 ---------------- */
+function show(id) { ["#startScreen", "#gameScreen", "#endScreen"].forEach(s => $(s).classList.toggle("hidden", s !== id)); }
+function startGame() {
+  Snd.init();
+  settings.name = $("#playerName").value.trim(); settings.timer = $("#timerMode").value; settings.sound = $("#soundOn").checked; saveSettings();
+  loadPool();
+  if (!POOL.length) { toast("題庫是空的，請先匯入題目或恢復範例題"); return; }
+  closeAllModals(); stopTimer(); clearLater();
+  Object.assign(S, { name: settings.name, level: 0, used: {}, usedIds: new Set(), removed: [], sel: -1, q: null, phase: "idle" });
+  stopConfetti(); show("#gameScreen"); openLadder(false); updateMute(); Snd.start();
+  nextQuestion(true);
+}
+function endGame(kind) {
+  stopTimer(); clearLater(); closeAllModals(); Snd.stopDrone();
+  const amt = kind === "win" ? 1000000 : kind === "walk" ? won() : safeWon();
+  const reached = kind === "win" ? 15 : S.level;
+  show("#endScreen");
+  const T = $("#endTitle"); T.className = "endTitle" + (kind === "win" ? " win" : "");
+  const texts = {
+    win: ["🎉 百萬得主！🎉", `恭喜 ${pname()} 答對全部 15 題，成為《百萬大挑戰》的百萬得主！`],
+    walk: ["見好就收！", `${pname()} 選擇放棄領獎，帶著獎金漂亮退場。`],
+    lose: ["挑戰結束", `很可惜答錯了……${amt ? "還好有保底獎金！" : "這次沒有帶走獎金，下次再接再厲！"}`],
+    timeout: ["時間到！", amt ? "時間用完了，但保底獎金還在！" : "時間用完了，下次再接再厲！"]
+  };
+  T.textContent = texts[kind][0]; $("#endSub").textContent = texts[kind][1];
+  $("#endAmt").textContent = fmt(amt);
+  $("#endStats").textContent = `答對 ${reached} 題　｜　使用求救 ${Object.keys(S.used).length} 次`;
+  if (kind === "win") { Snd.win(); confetti(); } else if (kind === "walk") Snd.walk();
+}
+
+/* ---------------- 彩帶 ---------------- */
+let confRAF = null;
+function confetti() {
+  const cv = $("#confetti"), ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ["#ffcf4a", "#ff9d00", "#fff3c4", "#6fd3ff", "#ff5b8a", "#7cf2a8", "#b58cff"], P = [];
+  const spawn = n => { for (let i = 0; i < n; i++) P.push({ x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * 0.5, vx: rnd(-1.5, 1.5), vy: rnd(2, 5), r: rnd(5, 10), a: rnd(0, 6.28), va: rnd(-0.2, 0.2), c: pick(colors), s: Math.random() < 0.6 }); };
+  spawn(220); const t0 = performance.now();
+  const step = t => {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    if (t - t0 < 6000 && P.length < 400) spawn(4);
+    for (let i = P.length - 1; i >= 0; i--) {
+      const p = P[i]; p.x += p.vx + Math.sin(p.a) * 0.6; p.y += p.vy; p.a += p.va;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c;
+      if (p.s) ctx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); else { ctx.beginPath(); ctx.arc(0, 0, p.r / 3, 0, 6.28); ctx.fill(); }
+      ctx.restore(); if (p.y > innerHeight + 30) P.splice(i, 1);
+    }
+    if (P.length) confRAF = requestAnimationFrame(step); else ctx.clearRect(0, 0, innerWidth, innerHeight);
+  };
+  cancelAnimationFrame(confRAF); confRAF = requestAnimationFrame(step);
+}
+function stopConfetti() { cancelAnimationFrame(confRAF); const cv = $("#confetti"); cv.getContext("2d").clearRect(0, 0, cv.width, cv.height); }
+
+/* ---------------- 匯入介面 ---------------- */
+function importMsg(text, ok) { const m = $("#importMsg"); m.textContent = text; m.className = ok ? "ok" : "err"; }
+$("#importFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader(); r.onload = () => { $("#importText").value = r.result; importMsg(`已讀取檔案「${f.name}」，請按「匯入並取代題庫」。`, true); }; r.readAsText(f, "utf-8");
+});
+$("#doImport").addEventListener("click", () => {
+  const res = parseImport($("#importText").value);
+  if (!res.ok.length) { importMsg("匯入失敗：\n" + res.errors.slice(0, 8).join("\n"), false); return; }
+  try { localStorage.setItem(LS_Q, JSON.stringify(res.ok.map(q => plainQ(q, false)))); } catch (e) { importMsg("無法儲存到瀏覽器：" + e.message, false); return; }
+  loadPool(); updatePoolInfo();
+  importMsg(`✅ 成功匯入 ${res.ok.length} 題${res.errors.length ? `，略過 ${res.errors.length} 題：\n` + res.errors.slice(0, 8).join("\n") : "。"}\n${coverageNote()}`, true);
+});
+$("#restoreSample").addEventListener("click", () => {
+  confirmBox("恢復範例題", "確定要刪除已匯入的自訂題目，改回範例題嗎？", () => {
+    try { localStorage.removeItem(LS_Q); } catch (e) {}
+    loadPool(); updatePoolInfo(); importMsg(`已恢復範例題（${POOL.length} 題）。`, true);
+  });
+});
+function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+$("#exportJson").addEventListener("click", () => download("百萬大挑戰_題庫.json", JSON.stringify(POOL.map(q => plainQ(q, true)), null, 2), "application/json"));
+$("#exportCsv").addEventListener("click", () => {
+  const esc = s => { s = s == null ? "" : String(s); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const lines = ["level,question,A,B,C,D,answer,explanation"].concat(POOL.map(q => [q.exact ? q.level : ["easy", "medium", "hard"][q.tier - 1], q.question, ...q.options, LETTERS[q.answer], q.explanation].map(esc).join(",")));
+  download("百萬大挑戰_題庫.csv", "\uFEFF" + lines.join("\r\n"), "text/csv");
+});
+
+/* ---------------- 事件綁定 ---------------- */
+function updateMute() { $("#muteBtn").textContent = settings.sound ? "🔊" : "🔇"; }
+$("#startBtn").addEventListener("click", startGame);
+$("#rulesBtn").addEventListener("click", () => { Snd.init(); Snd.click(); openModal("#rulesModal"); });
+$("#importBtn").addEventListener("click", () => { Snd.init(); Snd.click(); $("#importMsg").textContent = ""; openModal("#importModal"); });
+$("#againBtn").addEventListener("click", startGame);
+$("#homeBtn").addEventListener("click", () => { stopConfetti(); S.phase = "idle"; updatePoolInfo(); show("#startScreen"); });
+$("#ll5050").addEventListener("click", useFifty);
+$("#llAud").addEventListener("click", useAudience);
+$("#llPhone").addEventListener("click", usePhone);
+$("#llSwitch").addEventListener("click", useSwitch);
+$("#walkBtn").addEventListener("click", walkAway);
+$("#hangup").addEventListener("click", () => endCall("hang"));
+$("#muteBtn").addEventListener("click", () => { settings.sound = !settings.sound; saveSettings(); updateMute(); if (!settings.sound) Snd.stopDrone(); else Snd.init(); });
+$("#ladderToggle").addEventListener("click", () => openLadder(true));
+$("#ladderClose").addEventListener("click", () => openLadder(false));
+$("#ladderBackdrop").addEventListener("click", () => openLadder(false));
+document.addEventListener("keydown", e => {
+  if ($("#gameScreen").classList.contains("hidden") || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if (document.querySelector(".modal:not(.hidden)")) { if (e.key === "Escape") document.querySelectorAll(".modal:not(.hidden)").forEach(m => { if (m.id !== "phoneModal" || !$("#phonePick").classList.contains("hidden")) closeModal("#" + m.id); }); return; }
+  const k = e.key.toUpperCase();
+  if (LETTERS.includes(k)) chooseOption(LETTERS.indexOf(k));
+  else if (e.key === "Enter") { e.preventDefault(); if (S.phase === "confirm") finalAnswer(); else if ($("#nextBtn")) $("#nextBtn").click(); }
+  else if (e.key === "Escape" && S.phase === "confirm") cancelSelection();
+});
+$("#playerName").value = settings.name || ""; $("#timerMode").value = settings.timer || "std"; $("#soundOn").checked = settings.sound !== false;
+loadPool(); updatePoolInfo(); renderLadder(); updateMute();
+window.MC = { S, get POOL() { return POOL; }, parseImport }; // 測試／除錯用，可忽略
+</script>
+</body>
+</html>
