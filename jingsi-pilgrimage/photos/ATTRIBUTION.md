@@ -12,6 +12,11 @@ Used in 全台靜思堂巡禮 (non-official educational fan game).
 - License: user-supplied photo, not Wikimedia Commons
 - Shown in the visit panel as 「照片：EJ 提供」
 
+## changhua.jpg — 彰化靜思堂
+- Author: EJ 提供
+- License: user-supplied photo, not Wikimedia Commons
+- Shown in the visit panel as 「照片：EJ 提供」
+
 ## taichung.jpg — 台中靜思堂（南屯）
 - Author: EJ 提供
 - License: user-supplied photo, not Wikimedia Commons
