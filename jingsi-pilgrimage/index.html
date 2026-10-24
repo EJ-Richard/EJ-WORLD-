@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>全台靜思堂巡禮｜非官方衛教遊戲</title>
+<link rel="icon" href="data:,">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#87ceeb;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei","Heiti TC",sans-serif;color:#2c2416;user-select:none;-webkit-user-select:none}
+canvas{display:block;touch-action:none}
+button{font-family:inherit;cursor:pointer}
+.screen{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at 50% 20%,#ffe8c8 0%,#b8dce8 45%,#6aa8c8 100%)}
+.screen.hidden{display:none}
+.card{background:#fffdf8ee;border:3px solid #c9a46a;border-radius:20px;padding:22px 24px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 12px 40px #0003}
+.card h1{margin:0 0 6px;font-size:clamp(22px,5vw,32px);color:#8b4513;letter-spacing:.06em;text-align:center}
+.card .sub{text-align:center;color:#5a4a32;font-size:14px;line-height:1.55;margin:0 0 14px}
+.badge{display:inline-block;background:#fff3cd;border:1px solid #e0b84a;color:#7a5a10;font-size:11px;padding:3px 8px;border-radius:999px;margin:0 auto 12px;display:block;width:fit-content;text-align:center}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:12px 16px;margin:8px 0;font-size:17px;font-weight:800;color:#fff;background:linear-gradient(180deg,#d44,#a02820);box-shadow:0 4px 0 #6a1810;transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #6a1810}
+.btn.sec{background:linear-gradient(180deg,#5a8f6a,#3d6a4a);box-shadow:0 4px 0 #2a4a32}
+.btn.ghost{background:#fff;color:#5a4030;border:2px solid #c9a46a;box-shadow:none}
+.disclaimer{font-size:11px;line-height:1.5;color:#666;margin-top:12px;border-top:1px dashed #ddd;padding-top:10px}
+#hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;padding:8px;padding-top:max(8px,env(safe-area-inset-top));display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:flex-start}
+.hud-box{pointer-events:auto;background:#fffdf8e8;border:2px solid #c9a46a;border-radius:14px;padding:8px 12px;font-size:13px;line-height:1.4;box-shadow:0 3px 0 #0002;max-width:min(360px,70vw)}
+.hud-box b{color:#a02820}
+#stampRow{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.stamp-dot{width:22px;height:22px;border-radius:50%;border:2px dashed #c9a46a;display:flex;align-items:center;justify-content:center;font-size:11px;filter:grayscale(1);opacity:.4;background:#fff}
+.stamp-dot.got{filter:none;opacity:1;border-style:solid;border-color:#c0392b;background:#ffe8e0;transform:rotate(-8deg)}
+#nearPrompt{position:fixed;bottom:max(100px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:25;display:none;flex-direction:column;align-items:center;gap:8px}
+#nearPrompt.show{display:flex}
+#nearPrompt .label{background:#fffdf8f0;border:2px solid #c9a46a;border-radius:12px;padding:8px 14px;font-weight:700;font-size:15px;box-shadow:0 3px 0 #0002}
+#nearPrompt button{border:0;border-radius:14px;padding:12px 28px;font-size:18px;font-weight:800;color:#fff;background:linear-gradient(180deg,#d44,#a02820);box-shadow:0 4px 0 #6a1810}
+#controlsHint{position:fixed;bottom:8px;left:8px;z-index:15;background:#0005;color:#fff;font-size:11px;padding:6px 10px;border-radius:8px;max-width:240px;line-height:1.4;pointer-events:none}
+#muteBtn{position:fixed;top:max(8px,env(safe-area-inset-top));right:8px;z-index:30;width:40px;height:40px;border-radius:50%;border:2px solid #c9a46a;background:#fffdf8e8;font-size:18px;pointer-events:auto}
+#mobileControls{position:fixed;inset:0;z-index:18;pointer-events:none;display:none}
+#mobileControls.on{display:block}
+.joy-base{position:absolute;left:16px;bottom:max(20px,env(safe-area-inset-bottom));width:110px;height:110px;border-radius:50%;background:#0004;border:2px solid #fff6;pointer-events:auto}
+.joy-knob{position:absolute;width:48px;height:48px;border-radius:50%;background:#fffc;left:31px;top:31px;box-shadow:0 2px 6px #0004}
+.mob-btns{position:absolute;right:12px;bottom:max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;pointer-events:auto}
+.mob-btns button{width:56px;height:56px;border-radius:14px;border:2px solid #fff8;background:#0005;color:#fff;font-size:20px;font-weight:800}
+.mob-btns button:active,.mob-btns button.active{background:#c0392bcc}
+#hallPanel{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:12px;background:#1a1208cc;backdrop-filter:blur(4px)}
+#hallPanel.show{display:flex}
+#hallPanel .inner{background:#fffdf8;border:3px solid #c9a46a;border-radius:18px;max-width:560px;width:100%;max-height:94vh;overflow:auto;padding:18px 18px 14px;box-shadow:0 16px 50px #0005}
+#hallPanel h2{margin:0 0 4px;color:#8b4513;font-size:22px}
+#hallPanel .region{font-size:12px;color:#888;margin-bottom:10px}
+.vignette{height:110px;border-radius:12px;margin-bottom:12px;display:flex;align-items:flex-end;padding:10px;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 3px #0008;background-size:cover;background-position:center}
+.intro{font-size:14px;line-height:1.65;color:#3a3020;margin:0 0 10px}
+.highlights{margin:0 0 14px;padding-left:18px;font-size:13.5px;line-height:1.55;color:#3a3020}
+.highlights li{margin:4px 0}
+.quiz-box{background:#fff8ee;border:2px solid #e8c888;border-radius:12px;padding:12px;margin-bottom:10px}
+.quiz-box h3{margin:0 0 8px;font-size:15px;color:#8b4513}
+.q-opt{display:block;width:100%;text-align:left;border:2px solid #ddd;background:#fff;border-radius:10px;padding:10px 12px;margin:6px 0;font-size:14px;color:#2c2416}
+.q-opt:hover{border-color:#c9a46a}
+.q-opt.correct{border-color:#2e7d32;background:#e8f5e9}
+.q-opt.wrong{border-color:#c62828;background:#ffebee}
+.feedback{font-size:13px;margin-top:6px;min-height:1.2em}
+.stamp-unlock{text-align:center;padding:12px;display:none}
+.stamp-unlock.show{display:block}
+.stamp-big{width:72px;height:72px;border-radius:50%;border:3px solid #c0392b;background:#ffe8e0;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:32px;transform:rotate(-10deg);box-shadow:0 4px 0 #0002}
+#certPanel{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:12px;background:#1a1208dd}
+#certPanel.show{display:flex}
+.cert{background:linear-gradient(160deg,#fffef8,#fff5e0);border:6px double #c9a46a;border-radius:8px;padding:28px 24px;max-width:480px;width:100%;text-align:center;position:relative;overflow:hidden}
+.cert h2{margin:0 0 4px;color:#8b4513;font-size:24px;letter-spacing:.12em}
+.cert .orn{color:#c9a46a;font-size:20px;margin:4px 0}
+.cert input{width:80%;padding:8px;border:2px solid #c9a46a;border-radius:8px;font-size:16px;text-align:center;font-family:inherit;margin:10px 0}
+.cert .meta{font-size:12px;color:#666;line-height:1.5;margin-top:10px}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#minimap{position:fixed;bottom:max(8px,env(safe-area-inset-bottom));right:8px;z-index:16;width:120px;height:160px;background:#1a3040cc;border:2px solid #c9a46a;border-radius:10px;overflow:hidden}
+#minimap canvas{width:100%;height:100%}
+#routeHint{font-size:11px;color:#666;margin-top:4px}
+@media(max-width:600px){
+  .hud-box{font-size:12px;padding:6px 8px}
+  #controlsHint{display:none}
+  #mobileControls.on{display:block}
+}
+</style>
+</head>
+<body>
+<div id="startScreen" class="screen">
+  <div class="card">
+    <span class="badge">非官方粉絲衛教／人文導覽遊戲 · 非正式慈濟產品</span>
+    <h1>全台靜思堂巡禮</h1>
+    <p class="sub">駕駛飛天紅色 Roadster 2，從花蓮精舍起飛，穿梭全台十三站靜思堂／精舍。<br>認識每一座道場的建築與人文特色，收集巡禮印章，完成證書。</p>
+    <button class="btn" id="btnStart">🚀 開始巡禮</button>
+    <button class="btn sec" id="btnHelp">📖 遊戲說明</button>
+    <button class="btn ghost" id="btnAbout">關於本遊戲</button>
+    <p class="disclaimer">本遊戲為個人衛教／人文導覽用途之非官方粉絲作品，與財團法人中華民國佛教慈濟慈善事業基金會、靜思堂、大愛電視台等無關，亦非其授權產品。靜思堂相關描述依公開報導與導覽資料整理，僅供學習參考；細節如有出入，以各堂官方資訊為準。身體不適請就醫。駕駛 Roadster 2 為遊戲虛構飛行載具，致敬探索精神，與實際車輛無關。</p>
+  </div>
+</div>
+
+<div id="helpScreen" class="screen hidden">
+  <div class="card">
+    <h1>遊戲說明</h1>
+    <p class="sub" style="text-align:left">
+      <b>飛行</b>：WASD／方向鍵前進左右；Q／空白鍵上升、E／Ctrl 下降；Shift 加速；滑鼠拖曳轉視角。<br><br>
+      <b>手機</b>：左下虛擬搖桿移動；右側 ▲▼ 升降；⚡ 加速；單指拖曳畫面轉視角。<br><br>
+      <b>參觀</b>：飛近發光圖標 →「降落參觀」→ 閱讀亮點 → 答題 → 解鎖印章 → 起飛續航。<br><br>
+      <b>建議路線</b>：精舍 → 花蓮堂 → 北北基（關渡／板橋／雙和）→ 宜蘭 → 中彰（東大／台中／清水／彰化）→ 南高（台南／高雄）。
+    </p>
+    <button class="btn" id="btnHelpBack">返回</button>
+  </div>
+</div>
+
+<div id="aboutScreen" class="screen hidden">
+  <div class="card">
+    <h1>關於</h1>
+    <p class="sub" style="text-align:left;font-size:13px">
+      本遊戲以公開來源整理各靜思堂／精舍之建築與人文特色，包括臺灣宗教文化地圖、慈濟人文志業導覽、環境教育設施場所認證公開資料、地方新聞與建築專文等。<br><br>
+      地圖為示意比例，座標為近似值。遊戲架構靈感參考公開之城市 3D 探索體驗，載具為虛構飛天 Roadster 2。<br><br>
+      製作語氣：溫暖、教育、尊重靜思堂文化。敬請以莊嚴心參觀真實道場。
+    </p>
+    <button class="btn" id="btnAboutBack">返回</button>
+  </div>
+</div>
+
+<div id="hud" style="display:none">
+  <div class="hud-box">
+    <div><b>靜思堂巡禮</b> · 印章 <span id="stampCount">0</span>/13</div>
+    <div id="stampRow"></div>
+    <div id="routeHint">建議：精舍→花蓮→北北基→宜蘭→中彰→南高</div>
+  </div>
+  <div class="hud-box" id="nearestInfo" style="margin-left:auto">尋找發光圖標…</div>
+</div>
+<button id="muteBtn" title="靜音" style="display:none">🔊</button>
+<div id="controlsHint">WASD 飛行 · Q/空白↑ E/Ctrl↓ · Shift 加速 · 拖曳滑鼠環視</div>
+<div id="nearPrompt"><div class="label" id="nearLabel">附近：—</div><button id="btnLand">🛬 降落參觀</button></div>
+<div id="mobileControls">
+  <div class="joy-base" id="joyBase"><div class="joy-knob" id="joyKnob"></div></div>
+  <div class="mob-btns">
+    <button id="btnUp" type="button">▲</button>
+    <button id="btnDown" type="button">▼</button>
+    <button id="btnBoost" type="button">⚡</button>
+  </div>
+</div>
+<div id="minimap" style="display:none"><canvas id="miniCv" width="120" height="160"></canvas></div>
+
+<div id="hallPanel">
+  <div class="inner">
+    <div class="vignette" id="hallVig"></div>
+    <h2 id="hallTitle"></h2>
+    <div class="region" id="hallRegion"></div>
+    <p class="intro" id="hallIntro"></p>
+    <ul class="highlights" id="hallHighlights"></ul>
+    <div class="quiz-box" id="quizBox">
+      <h3 id="quizQ"></h3>
+      <div id="quizOpts"></div>
+      <div class="feedback" id="quizFb"></div>
+    </div>
+    <div class="stamp-unlock" id="stampUnlock">
+      <div class="stamp-big" id="stampIcon"></div>
+      <div style="font-weight:800;color:#a02820" id="stampName"></div>
+      <div style="font-size:13px;color:#666;margin:6px 0 10px">印章已收下，感恩這一段因緣。</div>
+      <button class="btn" id="btnTakeoff">🛫 起飛前往下一站</button>
+    </div>
+    <button class="btn ghost" id="btnSkipHall" style="margin-top:6px;display:none">先起飛，稍後再來</button>
+  </div>
+</div>
+
+<div id="certPanel">
+  <div class="cert">
+    <div class="confetti" id="confetti"></div>
+    <div class="orn">❀ ❀ ❀</div>
+    <h2>靜思堂巡禮證書</h2>
+    <div style="font-size:14px;color:#5a4a32;margin:8px 0">恭賀完成全台十三站巡禮</div>
+    <div style="font-size:13px;color:#888">獲頒稱號</div>
+    <div style="font-size:22px;font-weight:800;color:#a02820;margin:4px 0">靜思堂巡禮小天使</div>
+    <div style="font-size:13px;margin-top:10px">請留下芳名</div>
+    <input id="playerName" maxlength="20" placeholder="例如：EJ" value="EJ">
+    <div id="certDate" style="font-size:12px;color:#888"></div>
+    <div class="meta">本證書為非官方粉絲衛教遊戲紀念用，非正式慈濟認證。<br>身體不適請就醫；真實參訪請遵守各堂導覽規範。</div>
+    <button class="btn" id="btnCertClose" style="margin-top:14px">繼續遨遊天空</button>
+  </div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* ========== Hall data (public-source based) ========== */
+const HALLS = [
+  {
+    id:'jingshe', name:'花蓮靜思精舍', short:'精神起點', region:'花蓮縣新城鄉康樂村附近',
+    lat:24.023, lng:121.628,
+    intro:'靜思精舍是證嚴法師修道起家、靜思法脈的根源，也是全球慈濟人心中的「心靈故鄉」。常住眾秉持「一日不作，一日不食」，以自力更生維持生活，從不支用基金會善款。樸實莊嚴的精舍，承載慈悲喜捨的初心。來到這裡，像回到一切善行的起點。',
+    highlights:[
+      '證嚴法師修道起家、靜思法脈根源',
+      '常住「一日不作，一日不食」，自力更生',
+      '全球慈濟人的心靈故鄉',
+      '簡素莊嚴，無華麗裝飾'
+    ],
+    stamp:{name:'初心印', icon:'🪷'},
+    vignette:['#5a7a5a','#2d4a2d'],
+    quiz:[
+      {q:'靜思精舍常住眾的生活原則之一是？', opts:['依賴信徒供養','一日不作，一日不食','商業營運維生','政府補助'], a:1},
+      {q:'對全球慈濟人而言，精舍常被稱為？', opts:['度假村','心靈故鄉','購物中心','觀光景點'], a:1}
+    ]
+  },
+  {
+    id:'hualien', name:'花蓮靜思堂', short:'全台第一座', region:'花蓮市中央路三段一帶',
+    lat:23.992, lng:121.589,
+    intro:'花蓮靜思堂是全台第一座靜思堂，仿唐歇山、人字形屋頂象徵佛法僧三寶。簷梁上有 362 尊飛天浮雕環繞；講經堂屋頂以光纖呈現銀河星空。園區內的靜思竹軒採古法插榫擠籠，全台唯一。',
+    highlights:[
+      '全台第一座靜思堂；仿唐歇山、人字屋頂',
+      '362 尊飛天浮雕環繞建築',
+      '講經堂銀河星空屋頂，呼應佛陀夜睹明星',
+      '靜思竹軒：插榫擠籠古法竹屋（全台唯一）'
+    ],
+    stamp:{name:'飛天印', icon:'✨'},
+    vignette:['#8a9aaa','#4a5a6a'],
+    quiz:[
+      {q:'花蓮靜思堂簷梁上的飛天浮雕約有幾尊？', opts:['36 尊','108 尊','362 尊','1000 尊'], a:2},
+      {q:'靜思竹軒最特別的工法是？', opts:['全鋼筋混凝土','插榫擠籠古法','全玻璃帷幕','3D 列印'], a:1}
+    ]
+  },
+  {
+    id:'guandu', name:'關渡靜思堂', short:'人文藥草園', region:'台北市北投區關渡平原',
+    lat:25.120, lng:121.467,
+    intro:'關渡靜思堂坐落關渡平原，遠眺觀音山與淡水河出海口，是一座沒有圍牆的靜思堂。人文藥草園種植四十餘種藥草；園中「宇宙大覺者」佛像高約 5.5 公尺。此處也是大愛人文媒體總部所在，並有常不輕蔬食與第二代靜思書軒。',
+    highlights:[
+      '人文藥草園：40+ 種藥草，無圍牆設計',
+      '宇宙大覺者佛像高約 5.5 公尺',
+      '常不輕蔬食；第二代靜思書軒',
+      '大愛人文媒體總部（影音、出版等）'
+    ],
+    stamp:{name:'藥草印', icon:'🌿'},
+    vignette:['#6a9a6a','#3a6a4a'],
+    quiz:[
+      {q:'關渡人文藥草園約有多少種藥草？', opts:['不到 10 種','約 40 種以上','超過 500 種','只有香草'], a:1},
+      {q:'「宇宙大覺者」佛像高度約為？', opts:['1.5 公尺','5.5 公尺','15 公尺','50 公尺'], a:1}
+    ]
+  },
+  {
+    id:'banqiao', name:'板橋靜思堂', short:'社區營造', region:'新北市板橋區',
+    lat:25.001, lng:121.446,
+    intro:'板橋靜思堂重視社區共好，園區有社區花園綠地，長期推動兒童成長班與樂齡學堂，是都市靜思堂走入鄰里的典範之一。在這裡，道場不只是建築，更是社區的客廳與終身學習場域。',
+    highlights:[
+      '社區花園綠地，親近鄰里',
+      '兒童成長班與樂齡學堂',
+      '社區營造與終身學習典範',
+      '都市中的人文休憩空間'
+    ],
+    stamp:{name:'社區印', icon:'🏡'},
+    vignette:['#7aaa7a','#4a7a4a'],
+    quiz:[
+      {q:'板橋靜思堂特別著重哪一面向？', opts:['高山朝聖','社區營造與終身學習','海港貿易','工業展覽'], a:1},
+      {q:'園區常見的學習活動包括？', opts:['只有電競競賽','兒童成長班與樂齡學堂','賽車訓練','股市講座'], a:1}
+    ]
+  },
+  {
+    id:'shuanghe', name:'雙和靜思堂', short:'單簷歇山', region:'新北市中和區',
+    lat:25.005, lng:121.477,
+    intro:'雙和靜思堂總高約四十八公尺，屋頂為單簷歇山，正脊筆直、線條俐落樸素，不用華麗琉璃與斗拱，呈現沉穩莊嚴的現代佛教建築語彙。正面抱廈題「靜思堂」名款，整體外觀簡單自然。',
+    highlights:[
+      '建築高度約 48 公尺',
+      '單簷歇山屋頂，正脊筆直',
+      '線條俐落樸素，無繁複琉璃斗拱',
+      '現代語彙中的莊嚴道場'
+    ],
+    stamp:{name:'歇山印', icon:'🏯'},
+    vignette:['#9aa0a8','#5a6068'],
+    quiz:[
+      {q:'雙和靜思堂的高度約為？', opts:['約 8 公尺','約 48 公尺','約 200 公尺','約 2 公尺'], a:1},
+      {q:'其屋頂形式屬於？', opts:['全玻璃圓頂','單簷歇山','哥德尖塔','蒙古包'], a:1}
+    ]
+  },
+  {
+    id:'yilan', name:'宜蘭靜思堂', short:'2025 落成', region:'宜蘭市（近南門人文園區）',
+    lat:24.747, lng:121.753,
+    intro:'宜蘭靜思堂於 2025 年落成，以「宜蘭厝」結合仿唐斜屋頂，四面陽台因應多雨氣候。園區無圍牆、公園式開放，與周邊公共空間串聯。建設期間發起「安固瓦」（祈福瓦）認捐，讓祝福寫上瓦片、迎向天空。',
+    highlights:[
+      '2025 年落成；宜蘭厝＋仿唐斜屋頂',
+      '無圍牆公園式，與社區共好',
+      '祈福瓦／安固瓦：寫下祝福安裝於屋頂',
+      '多雨氣候下的陽台與「家」的歸屬感'
+    ],
+    stamp:{name:'祈福瓦印', icon:'🧧'},
+    vignette:['#6a8aaa','#3a5a7a'],
+    quiz:[
+      {q:'宜蘭靜思堂大約於哪一年落成啟用？', opts:['1990','2005','2025','2080'], a:2},
+      {q:'建設期間特色認捐項目是？', opts:['金幣','安固瓦／祈福瓦','跑車','衛星'], a:1}
+    ]
+  },
+  {
+    id:'dongda', name:'東大靜思堂', short:'大肚山生態', region:'台中市（大肚山一帶）',
+    lat:24.196, lng:120.608,
+    intro:'東大靜思堂隱於大肚山生態園區，由志工長年開墾荒地而成。園區可見高士佛澤蘭、紫斑蝶生態，以及梯田式菜園。無圍牆、無障礙，全年有導覽志工，是社區休閒、學習與生態共好的新地標。',
+    highlights:[
+      '大肚山生態園區，志工開墾經營',
+      '高士佛澤蘭與紫斑蝶生態',
+      '梯田菜園，季節蔬菜',
+      '無圍牆；全年導覽志工'
+    ],
+    stamp:{name:'紫蝶印', icon:'🦋'},
+    vignette:['#5a9a6a','#2a5a3a'],
+    quiz:[
+      {q:'東大靜思堂園區特別可見哪種生態亮點？', opts:['北極熊','紫斑蝶','沙漠駱駝','深海珊瑚'], a:1},
+      {q:'東大園區的菜園型態常被形容為？', opts:['梯田菜園','摩天農場','地下溫室','海上漁排'], a:1}
+    ]
+  },
+  {
+    id:'taichung', name:'台中靜思堂（南屯）', short:'環境教育場所', region:'台中市南屯區文心南路一帶',
+    lat:24.147, lng:120.647,
+    intro:'台中靜思堂（南屯）為國家認證環境教育設施場所。園內環境教育三館以友善大地（災害防救）、永續未來（循環經濟）、綠色生活（減緩暖化）為主題，並有互動教案，歡迎機關學校預約學習。',
+    highlights:[
+      '國家認證環境教育設施場所',
+      '友善大地館：災害防救與科普',
+      '永續未來館：循環經濟、延續物命',
+      '綠色生活館：減緩暖化、綠色行動'
+    ],
+    stamp:{name:'環教印', icon:'🌍'},
+    vignette:['#6a9aaa','#3a6a7a'],
+    quiz:[
+      {q:'台中（南屯）靜思堂的環教三館主題，下列何者正確？', opts:['友善大地／永續未來／綠色生活','水族館／動物園／遊樂園','股市／期貨／加密貨幣','只有圖書館'], a:0},
+      {q:'此處具有哪項國家認證？', opts:['世界遺產','環境教育設施場所','太空發射場','一級古蹟（本遊戲未主張）'], a:1}
+    ]
+  },
+  {
+    id:'qingshui', name:'清水靜思堂', short:'上人故鄉', region:'台中市清水區',
+    lat:24.269, lng:120.576,
+    intro:'清水是證嚴法師的出生地，清水靜思堂以合院式建築融合在地人文，鄰近港區藝術中心與文教機構。志工常以藺草文化與訪客結緣，讓故鄉情、人文香，在合院裡慢慢散發。',
+    highlights:[
+      '證嚴法師故鄉（清水）',
+      '合院式建築，傳統庭院美感',
+      '鄰近港區藝術中心等文教場域',
+      '在地藺草文化與人文教育'
+    ],
+    stamp:{name:'故鄉印', icon:'🌾'},
+    vignette:['#b0a080','#6a5a40'],
+    quiz:[
+      {q:'證嚴法師的出生地是？', opts:['高雄旗津','台中清水','澎湖馬公','金門'], a:1},
+      {q:'清水靜思堂建築形式強調？', opts:['合院式','摩天大樓','地下城','全透明球體'], a:0}
+    ]
+  },
+  {
+    id:'changhua', name:'彰化靜思堂', short:'秀水 · 圓', region:'彰化縣秀水鄉',
+    lat:24.041, lng:120.504,
+    intro:'彰化靜思堂位於秀水，建築語彙融合鹿港古都風情與四合院氛圍，飛簷屋瓦與開放中庭相映。上人曾主張中庭不加蓋，好讓天空、地上盡在眼前，凸顯「圓」與開闊視野的意象，也是社區藝文與教育的據點。',
+    highlights:[
+      '秀水；融合鹿港古都飛簷屋瓦風情',
+      '四合院／開放中庭氛圍',
+      '「圓」與開闊天空的意象',
+      '社區藝文、書軒與終身學習'
+    ],
+    stamp:{name:'圓滿印', icon:'⭕'},
+    vignette:['#a09070','#605040'],
+    quiz:[
+      {q:'彰化靜思堂位於？', opts:['秀水','阿里山山頂','墾丁沙灘','陽明山'], a:0},
+      {q:'關於中庭，公開記述中上人曾強調？', opts:['必須加蓋商場','保持開闊，天空地上盡在眼前','改成停車場','封閉成密室'], a:1}
+    ]
+  },
+  {
+    id:'tainan', name:'台南靜思堂', short:'仁德 · 志工與防震', region:'台南市仁德區',
+    lat:22.971, lng:120.242,
+    intro:'台南靜思堂位於仁德，凝聚無數志工參與興建的故事。建築重視耐震與安全，延續九二一之後對防震工法與希望工程的重視，讓道場成為可安住、可學習、可服務社區的堅實依靠。',
+    highlights:[
+      '仁德；志工參與興建的動人故事',
+      '重視耐震／防震工法與安全',
+      '延續希望工程對結構安全的堅持',
+      '南台灣社區志業與人文據點'
+    ],
+    stamp:{name:'志工印', icon:'💪'},
+    vignette:['#c0a070','#706040'],
+    quiz:[
+      {q:'台南靜思堂位於哪個行政區？', opts:['仁德','北投','花蓮新城','澎湖湖西'], a:0},
+      {q:'興建過程特別被傳頌的是？', opts:['只有機器施工、無人參與','志工共同參與興建','全由空投完成','一夜建成'], a:1}
+    ]
+  },
+  {
+    id:'kaohsiung', name:'高雄靜思堂', short:'環教三館', region:'高雄市三民區河堤南路一帶',
+    lat:22.657, lng:120.312,
+    intro:'高雄靜思堂緊鄰運河與河堤公園，綠建築與省水省電工法貫串場域。此處是慈濟志業中首批取得國家環境教育設施場所認證者之一，設有氣候變遷館、低碳生活館、慈悲科技館，以「趣愛地球」等課程推廣永續行動。園區亦有莊嚴集會空間與書軒閱讀氛圍（含親子／兒童友善閱讀安排，依現場為準）。',
+    highlights:[
+      '氣候變遷館、低碳生活館、慈悲科技館',
+      '國家環境教育設施場所認證（公開資料）',
+      '綠建築；鄰近運河與河堤公園',
+      '慈悲科技：回收再生與賑災物資智慧'
+    ],
+    stamp:{name:'慈悲科技印', icon:'♻️'},
+    vignette:['#5a8aaa','#2a4a6a'],
+    quiz:[
+      {q:'高雄靜思堂環教三館包括？', opts:['氣候變遷／低碳生活／慈悲科技','烘焙／咖啡／茶道而已','只有健身房','電競館三樓'], a:0},
+      {q:'「慈悲科技」常強調的方向是？', opts:['軍武研發','回收再生與賑災物資等智慧應用','太空武器','投機金融'], a:1}
+    ]
+  },
+  {
+    id:'taoyuan', name:'桃園靜思堂', short:'桃園人文據點', region:'桃園市',
+    lat:24.993, lng:121.297,
+    intro:'桃園靜思堂是桃園地區慈濟人的精進與社區服務據點，承載靜思法脈在地深耕。作為北台灣城際之間的重要節點，這裡連結志工培訓、社區關懷與人文課程，讓忙碌的桃園也能有一處沉澱與付出的家。',
+    highlights:[
+      '桃園地區志業與社區服務據點',
+      '人文課程與志工培訓空間',
+      '連結北台灣城際巡禮的節點',
+      '開放社區共好（依現場公告）'
+    ],
+    stamp:{name:'桃園印', icon:'✈️'},
+    vignette:['#7a9aba','#3a5a7a'],
+    quiz:[
+      {q:'桃園靜思堂在本遊戲中的角色是？', opts:['北台灣城際巡禮節點與在地服務據點','太空站','海底隧道','唯一的古蹟博物館'], a:0}
+    ]
+  }
+];
+
+
+
+/* Optional light pins — shorter blurbs */
+const OPTIONAL = [
+  {id:'hsinchu', name:'新竹靜思堂', lat:24.784, lng:120.948, note:'新竹區靜思堂；社區學習與活動（可選參訪，本關不強制印章）'}
+];
+
+const TOTAL = HALLS.length; // 13
+
+/* ========== Geo → world ========== */
+function latLngToWorld(lat, lng) {
+  // Taiwan approx center 23.7, 121.0
+  const x = (lng - 121.0) * 95;
+  const z = (23.7 - lat) * 110;
+  return new THREE.Vector3(x, 0, z);
+}
+
+/* ========== State ========== */
+const state = {
+  stamps: new Set(),
+  currentHall: null,
+  quizIdx: 0,
+  nearId: null,
+  muted: false,
+  started: false,
+  certShown: false,
+  keys: {},
+  yaw: 0,
+  pitch: -0.25,
+  speed: 0,
+  boosting: false,
+  mobile: {x:0,y:0,up:false,down:false,boost:false}
+};
+
+/* ========== Audio (soft ambient) ========== */
+let audioCtx = null, ambientNodes = [];
+function ensureAudio() {
+  if (state.muted) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function startAmbient() {
+  ensureAudio();
+  if (!audioCtx || ambientNodes.length || state.muted) return;
+  const master = audioCtx.createGain();
+  master.gain.value = 0.04;
+  master.connect(audioCtx.destination);
+  [196, 246.94, 293.66].forEach((f, i) => {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = f;
+    g.gain.value = 0.15 - i * 0.03;
+    o.connect(g); g.connect(master);
+    o.start();
+    ambientNodes.push(o, g);
+  });
+  ambientNodes.push(master);
+}
+function stopAmbient() {
+  ambientNodes.forEach(n => { try { n.stop?.(); n.disconnect?.(); } catch(e){} });
+  ambientNodes = [];
+}
+function blip(ok) {
+  if (state.muted) return;
+  ensureAudio();
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.frequency.value = ok ? 660 : 220;
+  o.type = 'triangle';
+  g.gain.value = 0.08;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+  o.stop(audioCtx.currentTime + 0.22);
+}
+
+/* ========== Three.js scene ========== */
+const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x87ceeb);
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x87ceeb, 80, 280);
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.5, 500);
+const sun = new THREE.DirectionalLight(0xfff2d8, 1.1);
+sun.position.set(40, 80, 20);
+scene.add(sun, new THREE.AmbientLight(0xb0d0ff, 0.55));
+scene.add(new THREE.HemisphereLight(0x87ceeb, 0x6a8a4a, 0.45));
+
+/* Ocean */
+const ocean = new THREE.Mesh(
+  new THREE.PlaneGeometry(600, 600),
+  new THREE.MeshLambertMaterial({color:0x3a8ab8})
+);
+ocean.rotation.x = -Math.PI/2;
+ocean.position.y = -1.2;
+scene.add(ocean);
+
+/* Stylized Taiwan outline (approx polygon) */
+const twShape = new THREE.Shape();
+const twPts = [
+  [121.0,25.3],[121.6,25.3],[122.0,25.0],[121.9,24.6],[121.8,24.2],[121.6,23.8],
+  [121.5,23.2],[121.3,22.8],[121.0,22.4],[120.8,22.1],[120.5,22.0],[120.2,22.3],
+  [120.1,22.7],[120.1,23.2],[120.2,23.7],[120.3,24.1],[120.5,24.5],[120.7,24.8],
+  [120.9,25.0],[121.0,25.3]
+];
+twPts.forEach(([lng,lat],i)=>{
+  const v = latLngToWorld(lat,lng);
+  if(i===0) twShape.moveTo(v.x, -v.z); else twShape.lineTo(v.x, -v.z);
+});
+const twGeo = new THREE.ExtrudeGeometry(twShape, {depth:1.2, bevelEnabled:false});
+twGeo.rotateX(-Math.PI/2);
+const twMat = new THREE.MeshLambertMaterial({color:0x7cbc6a});
+const taiwan = new THREE.Mesh(twGeo, twMat);
+taiwan.position.y = 0;
+scene.add(taiwan);
+
+/* Soft hills */
+for (let i=0;i<18;i++){
+  const h = new THREE.Mesh(
+    new THREE.ConeGeometry(3+Math.random()*4, 2+Math.random()*5, 5),
+    new THREE.MeshLambertMaterial({color:0x5a9a4a})
+  );
+  const lat = 22.2 + Math.random()*3;
+  const lng = 120.4 + Math.random()*1.4;
+  const p = latLngToWorld(lat,lng);
+  h.position.set(p.x, h.geometry.parameters.height/2, p.z);
+  scene.add(h);
+}
+
+/* Clouds */
+for (let i=0;i<20;i++){
+  const c = new THREE.Mesh(
+    new THREE.SphereGeometry(2+Math.random()*3, 8, 6),
+    new THREE.MeshLambertMaterial({color:0xffffff, transparent:true, opacity:0.75})
+  );
+  c.position.set((Math.random()-0.5)*200, 25+Math.random()*20, (Math.random()-0.5)*220);
+  c.scale.set(1.8, 0.5, 1.2);
+  scene.add(c);
+}
+
+/* Pins */
+const pinGroup = new THREE.Group();
+scene.add(pinGroup);
+const pinMeshes = {};
+const pinLightMats = {};
+
+function makePin(hall) {
+  const g = new THREE.Group();
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.15, 0.15, 4, 6),
+    new THREE.MeshLambertMaterial({color:0xc9a46a})
+  );
+  stem.position.y = 2;
+  const bulb = new THREE.Mesh(
+    new THREE.SphereGeometry(0.9, 12, 10),
+    new THREE.MeshLambertMaterial({color:0xff6644, emissive:0xaa2200, emissiveIntensity:0.5})
+  );
+  bulb.position.y = 4.5;
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(1.2, 1.6, 20),
+    new THREE.MeshBasicMaterial({color:0xffdd88, side:THREE.DoubleSide, transparent:true, opacity:0.7})
+  );
+  ring.rotation.x = -Math.PI/2;
+  ring.position.y = 0.15;
+  g.add(stem, bulb, ring);
+  const p = latLngToWorld(hall.lat, hall.lng);
+  g.position.set(p.x, 0, p.z);
+  g.userData.id = hall.id;
+  pinGroup.add(g);
+  pinMeshes[hall.id] = g;
+  pinLightMats[hall.id] = bulb.material;
+}
+HALLS.forEach(makePin);
+
+/* Optional light pins */
+OPTIONAL.forEach(o => {
+  const g = new THREE.Group();
+  const bulb = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 8, 8),
+    new THREE.MeshLambertMaterial({color:0xaaccff, emissive:0x224466, emissiveIntensity:0.3})
+  );
+  bulb.position.y = 2.5;
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08,0.08,2.5,6),
+    new THREE.MeshLambertMaterial({color:0x8899aa})
+  );
+  stem.position.y = 1.25;
+  g.add(stem, bulb);
+  const p = latLngToWorld(o.lat, o.lng);
+  g.position.set(p.x, 0, p.z);
+  g.userData.optional = o;
+  pinGroup.add(g);
+});
+
+/* ========== Flying Roadster 2 ========== */
+const car = new THREE.Group();
+function addBox(parent, w,h,d, color, x,y,z, rx=0,ry=0,rz=0) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),
+    new THREE.MeshLambertMaterial({color})
+  );
+  m.position.set(x,y,z);
+  m.rotation.set(rx,ry,rz);
+  parent.add(m);
+  return m;
+}
+// Body glossy red
+addBox(car, 2.2, 0.45, 4.2, 0xc41e1e, 0, 0.55, 0);
+addBox(car, 1.9, 0.35, 2.0, 0xa01818, 0, 0.85, -0.2); // cabin lower
+// Hood / nose
+addBox(car, 2.0, 0.3, 1.2, 0xd42828, 0, 0.5, 1.6);
+// Windshield frame
+addBox(car, 1.7, 0.55, 0.08, 0x222222, 0, 1.15, 0.55, -0.4,0,0);
+// Seats
+addBox(car, 0.55, 0.4, 0.55, 0x1a1a1a, -0.45, 0.9, -0.1);
+addBox(car, 0.55, 0.4, 0.55, 0x1a1a1a, 0.45, 0.9, -0.1);
+// Wheels
+[[-1.1,0.35,1.3],[1.1,0.35,1.3],[-1.1,0.35,-1.3],[1.1,0.35,-1.3]].forEach(([x,y,z])=>{
+  const w = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.38,0.38,0.28,12),
+    new THREE.MeshLambertMaterial({color:0x111111})
+  );
+  w.rotation.z = Math.PI/2;
+  w.position.set(x,y,z);
+  car.add(w);
+});
+// Thruster flames (under car)
+const flames = [];
+[-0.6,0.6].forEach(x => {
+  const flame = new THREE.Mesh(
+    new THREE.ConeGeometry(0.25, 1.2, 6),
+    new THREE.MeshBasicMaterial({color:0xffaa33, transparent:true, opacity:0.85})
+  );
+  flame.rotation.x = Math.PI;
+  flame.position.set(x, -0.15, -1.8);
+  car.add(flame);
+  flames.push(flame);
+  const core = new THREE.Mesh(
+    new THREE.ConeGeometry(0.12, 0.8, 5),
+    new THREE.MeshBasicMaterial({color:0xffeeaa, transparent:true, opacity:0.9})
+  );
+  core.rotation.x = Math.PI;
+  core.position.set(x, -0.05, -1.7);
+  car.add(core);
+  flames.push(core);
+});
+// Underglow
+const glow = new THREE.PointLight(0xff6622, 1.2, 12);
+glow.position.set(0, -0.3, -1);
+car.add(glow);
+const startPos = latLngToWorld(24.023, 121.628);
+car.position.set(startPos.x, 12, startPos.z + 8);
+scene.add(car);
+
+/* ========== UI wiring ========== */
+const $ = id => document.getElementById(id);
+$('btnStart').onclick = () => {
+  $('startScreen').classList.add('hidden');
+  $('hud').style.display = 'flex';
+  $('muteBtn').style.display = 'block';
+  $('minimap').style.display = 'block';
+  state.started = true;
+  buildStampRow();
+  startAmbient();
+  if (matchMedia('(pointer:coarse)').matches || innerWidth < 800) {
+    $('mobileControls').classList.add('on');
+  }
+  renderer.domElement.requestPointerLock?.();
+};
+$('btnHelp').onclick = () => { $('startScreen').classList.add('hidden'); $('helpScreen').classList.remove('hidden'); };
+$('btnHelpBack').onclick = () => { $('helpScreen').classList.add('hidden'); $('startScreen').classList.remove('hidden'); };
+$('btnAbout').onclick = () => { $('startScreen').classList.add('hidden'); $('aboutScreen').classList.remove('hidden'); };
+$('btnAboutBack').onclick = () => { $('aboutScreen').classList.add('hidden'); $('startScreen').classList.remove('hidden'); };
+$('muteBtn').onclick = () => {
+  state.muted = !state.muted;
+  $('muteBtn').textContent = state.muted ? '🔇' : '🔊';
+  if (state.muted) stopAmbient(); else startAmbient();
+};
+$('btnLand').onclick = () => { if (state.nearId) openHall(state.nearId); };
+$('btnTakeoff').onclick = () => closeHall();
+$('btnSkipHall').onclick = () => closeHall();
+$('btnCertClose').onclick = () => { $('certPanel').classList.remove('show'); };
+
+function buildStampRow() {
+  const row = $('stampRow');
+  row.innerHTML = '';
+  HALLS.forEach(h => {
+    const d = document.createElement('div');
+    d.className = 'stamp-dot' + (state.stamps.has(h.id) ? ' got' : '');
+    d.textContent = h.stamp.icon;
+    d.title = h.stamp.name + ' · ' + h.name;
+    row.appendChild(d);
+  });
+  $('stampCount').textContent = state.stamps.size;
+}
+
+function openHall(id) {
+  const hall = HALLS.find(h => h.id === id);
+  if (!hall) return;
+  state.currentHall = hall;
+  state.quizIdx = 0;
+  $('hallTitle').textContent = hall.name;
+  $('hallRegion').textContent = hall.short + ' · ' + hall.region;
+  $('hallIntro').textContent = hall.intro;
+  $('hallHighlights').innerHTML = hall.highlights.map(t => `<li>${t}</li>`).join('');
+  const [c1,c2] = hall.vignette;
+  $('hallVig').style.background = `linear-gradient(135deg,${c1},${c2})`;
+  $('hallVig').textContent = hall.stamp.icon + ' ' + hall.name;
+  $('stampUnlock').classList.remove('show');
+  $('quizBox').style.display = 'block';
+  if (state.stamps.has(id)) {
+    showStampUnlocked(hall, true);
+  } else {
+    showQuiz(hall, 0);
+  }
+  $('hallPanel').classList.add('show');
+  document.exitPointerLock?.();
+}
+
+function showQuiz(hall, idx) {
+  const quiz = hall.quiz[idx];
+  if (!quiz) { unlockStamp(hall); return; }
+  state.quizIdx = idx;
+  $('quizQ').textContent = `問題 ${idx+1}/${hall.quiz.length}：${quiz.q}`;
+  $('quizFb').textContent = '';
+  $('quizOpts').innerHTML = '';
+  quiz.opts.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'q-opt';
+    b.textContent = opt;
+    b.onclick = () => {
+      if (i === quiz.a) {
+        b.classList.add('correct');
+        $('quizFb').textContent = '答對了，感恩！';
+        $('quizFb').style.color = '#2e7d32';
+        blip(true);
+        setTimeout(() => {
+          if (idx + 1 < hall.quiz.length) showQuiz(hall, idx + 1);
+          else unlockStamp(hall);
+        }, 450);
+      } else {
+        b.classList.add('wrong');
+        $('quizFb').textContent = '再想一想，可以重試喔。';
+        $('quizFb').style.color = '#c62828';
+        blip(false);
+        setTimeout(() => b.classList.remove('wrong'), 600);
+      }
+    };
+    $('quizOpts').appendChild(b);
+  });
+}
+
+function unlockStamp(hall) {
+  state.stamps.add(hall.id);
+  buildStampRow();
+  updatePinVisuals();
+  showStampUnlocked(hall, false);
+  if (state.stamps.size >= TOTAL && !state.certShown) {
+    setTimeout(showCertificate, 800);
+  }
+}
+
+function showStampUnlocked(hall, already) {
+  $('quizBox').style.display = 'none';
+  $('stampUnlock').classList.add('show');
+  $('stampIcon').textContent = hall.stamp.icon;
+  $('stampName').textContent = (already ? '已收集：' : '解鎖印章：') + hall.stamp.name;
+}
+
+function closeHall() {
+  $('hallPanel').classList.remove('show');
+  state.currentHall = null;
+}
+
+function showCertificate() {
+  state.certShown = true;
+  const d = new Date();
+  $('certDate').textContent = `紀年：${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（Asia/Taipei）`;
+  $('certPanel').classList.add('show');
+  const box = $('confetti');
+  box.innerHTML = '';
+  for (let i=0;i<40;i++){
+    const s = document.createElement('div');
+    s.style.cssText = `position:absolute;width:8px;height:8px;border-radius:2px;background:hsl(${Math.random()*60+10},80%,55%);left:${Math.random()*100}%;top:-10px;animation:fall ${2+Math.random()*2}s linear forwards;opacity:.9`;
+    box.appendChild(s);
+  }
+  if (!$('fallStyle')) {
+    const st = document.createElement('style');
+    st.id = 'fallStyle';
+    st.textContent = `@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}`;
+    document.head.appendChild(st);
+  }
+  blip(true); blip(true);
+}
+
+function updatePinVisuals() {
+  HALLS.forEach(h => {
+    const mat = pinLightMats[h.id];
+    if (!mat) return;
+    if (state.stamps.has(h.id)) {
+      mat.color.setHex(0x44cc66);
+      mat.emissive.setHex(0x116622);
+    } else {
+      mat.color.setHex(0xff6644);
+      mat.emissive.setHex(0xaa2200);
+    }
+  });
+}
+
+/* ========== Controls ========== */
+addEventListener('keydown', e => {
+  state.keys[e.code] = true;
+  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+});
+addEventListener('keyup', e => { state.keys[e.code] = false; });
+
+let dragging = false, lastX=0, lastY=0;
+renderer.domElement.addEventListener('pointerdown', e => {
+  if (!state.started || state.currentHall) return;
+  if (e.pointerType === 'touch' && e.clientX < innerWidth * 0.4) return;
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  renderer.domElement.setPointerCapture?.(e.pointerId);
+});
+renderer.domElement.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  state.yaw -= dx * 0.005;
+  state.pitch -= dy * 0.004;
+  state.pitch = Math.max(-1.2, Math.min(0.4, state.pitch));
+});
+renderer.domElement.addEventListener('pointerup', () => { dragging = false; });
+
+/* Mobile joystick */
+(function setupJoy(){
+  const base = $('joyBase'), knob = $('joyKnob');
+  let active = false, pid = null;
+  const sync = (cx, cy) => {
+    const r = base.getBoundingClientRect();
+    const ox = r.left + r.width/2, oy = r.top + r.height/2;
+    let dx = cx - ox, dy = cy - oy;
+    const max = r.width/2 - 10;
+    const len = Math.hypot(dx,dy) || 1;
+    if (len > max) { dx = dx/len*max; dy = dy/len*max; }
+    knob.style.left = (r.width/2 - 24 + dx) + 'px';
+    knob.style.top = (r.height/2 - 24 + dy) + 'px';
+    state.mobile.x = dx / max;
+    state.mobile.y = dy / max;
+  };
+  const reset = () => {
+    state.mobile.x = state.mobile.y = 0;
+    knob.style.left = '31px'; knob.style.top = '31px';
+  };
+  base.addEventListener('pointerdown', e => { active=true; pid=e.pointerId; base.setPointerCapture(pid); sync(e.clientX,e.clientY); e.preventDefault(); });
+  base.addEventListener('pointermove', e => { if(active) sync(e.clientX,e.clientY); });
+  base.addEventListener('pointerup', () => { active=false; reset(); });
+  base.addEventListener('pointercancel', () => { active=false; reset(); });
+  const hold = (btn, key) => {
+    btn.addEventListener('pointerdown', e => { state.mobile[key]=true; btn.classList.add('active'); e.preventDefault(); });
+    btn.addEventListener('pointerup', () => { state.mobile[key]=false; btn.classList.remove('active'); });
+    btn.addEventListener('pointerleave', () => { state.mobile[key]=false; btn.classList.remove('active'); });
+  };
+  hold($('btnUp'),'up'); hold($('btnDown'),'down'); hold($('btnBoost'),'boost');
+})();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ========== Minimap ========== */
+const miniCv = $('miniCv');
+const miniCtx = miniCv.getContext('2d');
+function drawMinimap() {
+  const w = 120, h = 160;
+  miniCtx.fillStyle = '#1a3040';
+  miniCtx.fillRect(0,0,w,h);
+  miniCtx.fillStyle = '#3a8ab8';
+  miniCtx.fillRect(0,0,w,h);
+  // Taiwan blob
+  miniCtx.fillStyle = '#6aaa5a';
+  miniCtx.beginPath();
+  twPts.forEach(([lng,lat],i)=>{
+    const x = ((lng - 119.8) / 2.5) * w;
+    const y = ((25.5 - lat) / 3.8) * h;
+    if(i===0) miniCtx.moveTo(x,y); else miniCtx.lineTo(x,y);
+  });
+  miniCtx.closePath();
+  miniCtx.fill();
+  HALLS.forEach(hall => {
+    const x = ((hall.lng - 119.8) / 2.5) * w;
+    const y = ((25.5 - hall.lat) / 3.8) * h;
+    miniCtx.beginPath();
+    miniCtx.arc(x,y,3,0,Math.PI*2);
+    miniCtx.fillStyle = state.stamps.has(hall.id) ? '#4c4' : '#f64';
+    miniCtx.fill();
+  });
+  // car
+  const cx = (( (car.position.x/95 + 121.0) - 119.8) / 2.5) * w;
+  const cy = ((25.5 - (23.7 - car.position.z/110)) / 3.8) * h;
+  miniCtx.fillStyle = '#ff0';
+  miniCtx.beginPath();
+  miniCtx.arc(cx,cy,4,0,Math.PI*2);
+  miniCtx.fill();
+}
+
+/* ========== Game loop ========== */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (state.started && !state.currentHall) {
+    updateFlight(dt);
+    checkNear();
+  }
+  // flame animation
+  const t = performance.now() * 0.01;
+  flames.forEach((f,i) => {
+    f.scale.y = 0.8 + Math.sin(t + i)*0.25 + (state.boosting?0.5:0);
+    f.material.opacity = 0.6 + Math.sin(t*2+i)*0.2;
+  });
+  glow.intensity = 0.8 + (state.boosting?1.2:0) + Math.sin(t)*0.2;
+  // camera chase
+  const camDist = 10, camH = 4;
+  const ox = Math.sin(state.yaw) * camDist;
+  const oz = Math.cos(state.yaw) * camDist;
+  const target = new THREE.Vector3(
+    car.position.x + ox,
+    car.position.y + camH + Math.sin(state.pitch)*6,
+    car.position.z + oz
+  );
+  camera.position.lerp(target, 0.08);
+  const look = car.position.clone();
+  look.y += 1;
+  camera.lookAt(look);
+  // pin pulse
+  Object.values(pinMeshes).forEach(g => {
+    const ring = g.children[2];
+    if (ring) { ring.rotation.z += dt; ring.scale.setScalar(1+Math.sin(performance.now()*0.003)*0.08); }
+  });
+  renderer.render(scene, camera);
+  if (state.started) drawMinimap();
+}
+
+function updateFlight(dt) {
+  const k = state.keys;
+  let forward = 0, strafe = 0, vert = 0;
+  if (k['KeyW']||k['ArrowUp']) forward += 1;
+  if (k['KeyS']||k['ArrowDown']) forward -= 1;
+  if (k['KeyA']||k['ArrowLeft']) strafe -= 1;
+  if (k['KeyD']||k['ArrowRight']) strafe += 1;
+  if (k['KeyQ']||k['Space']) vert += 1;
+  if (k['KeyE']||k['ControlLeft']||k['ControlRight']) vert -= 1;
+  // mobile
+  forward += -state.mobile.y;
+  strafe += state.mobile.x;
+  if (state.mobile.up) vert += 1;
+  if (state.mobile.down) vert -= 1;
+  state.boosting = !!(k['ShiftLeft']||k['ShiftRight']||state.mobile.boost);
+  const maxSp = state.boosting ? 55 : 28;
+  const want = (Math.abs(forward)>0.05 || Math.abs(strafe)>0.05) ? maxSp : 0;
+  state.speed += (want - state.speed) * Math.min(1, dt*3);
+  // yaw from strafe lightly
+  if (Math.abs(strafe)>0.1) state.yaw -= strafe * dt * 1.2;
+  const dirX = -Math.sin(state.yaw);
+  const dirZ = -Math.cos(state.yaw);
+  car.position.x += (dirX * forward + Math.cos(state.yaw) * strafe) * state.speed * dt;
+  car.position.z += (dirZ * forward + Math.sin(state.yaw) * (-strafe)) * state.speed * dt;
+  car.position.y += vert * (state.boosting?22:14) * dt;
+  car.position.y = Math.max(3, Math.min(60, car.position.y));
+  // soft bounds
+  car.position.x = Math.max(-90, Math.min(90, car.position.x));
+  car.position.z = Math.max(-120, Math.min(100, car.position.z));
+  car.rotation.y = state.yaw + Math.PI;
+  car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, -strafe*0.25, 0.1);
+  car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, forward*0.08 - vert*0.05, 0.1);
+}
+
+function checkNear() {
+  let best = null, bestD = 14;
+  HALLS.forEach(h => {
+    const p = latLngToWorld(h.lat, h.lng);
+    const d = car.position.distanceTo(new THREE.Vector3(p.x, car.position.y, p.z));
+    const d3 = Math.hypot(car.position.x-p.x, car.position.z-p.z);
+    if (d3 < bestD) { bestD = d3; best = h; }
+  });
+  // optional hover
+  let optNote = null;
+  pinGroup.children.forEach(g => {
+    if (!g.userData.optional) return;
+    const d3 = Math.hypot(car.position.x-g.position.x, car.position.z-g.position.z);
+    if (d3 < 10) optNote = g.userData.optional;
+  });
+  if (best) {
+    state.nearId = best.id;
+    $('nearPrompt').classList.add('show');
+    $('nearLabel').textContent = (state.stamps.has(best.id)?'✓ ':'') + best.name;
+    $('nearestInfo').innerHTML = `<b>接近</b> ${best.name}<br><span style="font-size:11px;color:#666">${best.short}</span>`;
+  } else {
+    state.nearId = null;
+    $('nearPrompt').classList.remove('show');
+    if (optNote) {
+      $('nearestInfo').innerHTML = `<b>可選地標</b> ${optNote.name}<br><span style="font-size:11px;color:#666">${optNote.note}</span>`;
+    } else {
+      $('nearestInfo').textContent = '尋找發光圖標，飛近即可降落…';
+    }
+  }
+}
+
+animate();
+
+/* Expose for headless tests */
+window.__game = { state, HALLS, openHall, unlockStamp, car, TOTAL, buildStampRow, showCertificate, closeHall };
+</script>
+</body>
+</html>
